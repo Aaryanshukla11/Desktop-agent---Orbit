@@ -1,0 +1,21 @@
+/*
+ 
+ */
+
+import { AgentWebUIImplementation } from '@tarko/interface';
+import type { AgentServer } from '../../types';
+
+/**
+ * Merge web UI config with agent constructor config
+ * This ensures consistent configuration merging across different contexts
+ * @param baseWebUIConfig Base Agent UI Configuration from app config
+ * @param server Optional agent server instance to get constructor config
+ * @returns Merged Agent UI Configuration
+ */
+export function mergeWebUIConfig(
+  baseWebUIConfig: AgentWebUIImplementation,
+  server?: AgentServer,
+): AgentWebUIImplementation & Record<string, any> {
+  const agentConstructorWebConfig = server?.getAgentConstructorWebConfig();
+  return { ...baseWebUIConfig, ...agentConstructorWebConfig };
+}

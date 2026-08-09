@@ -1,0 +1,22 @@
+/*
+ 
+ */
+
+/**
+ * A example to use models from "lm-studio".
+ */
+
+import { Agent } from '../../src';
+
+async function main() {
+  const agent = new Agent({
+    model: {
+      provider: 'lm-studio',
+      id: 'lmstudio-community/qwen3-1.7b',
+    },
+  });
+  const answer = await agent.run('Hello, what is your name?');
+  console.log(answer);
+}
+
+main();

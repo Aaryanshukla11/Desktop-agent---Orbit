@@ -1,0 +1,22 @@
+/*
+ 
+ */
+
+/**
+ * An minimal example to using built-in model provider
+ */
+
+import { Agent } from '../../src';
+
+async function main() {
+  const agent = new Agent({
+    model: {
+      provider: 'openai',
+      id: 'gpt-4.5-preview',
+    },
+  });
+  const answer = await agent.run('Hello, what is your name?');
+  console.log(answer);
+}
+
+main();

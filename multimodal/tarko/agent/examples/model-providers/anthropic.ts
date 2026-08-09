@@ -1,0 +1,25 @@
+/*
+ 
+ */
+
+/**
+ * A example to use models from "volcengine".
+ *
+ * @default baseUrl https://ark.cn-beijing.volces.com/api/v3
+ * @default apiKey https://ark.cn-beijing.volces.com/api/v3
+ */
+
+import { Agent } from '../../src';
+
+async function main() {
+  const agent = new Agent({
+    model: {
+      provider: 'anthropic',
+      id: 'claude-3-7-sonnet-latest',
+    },
+  });
+  const answer = await agent.run('Hello, what is your name?');
+  console.log(answer);
+}
+
+main();
