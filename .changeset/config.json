@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.5/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@UI-TARs/*",
+      "!@UI-TARs/visualizer"
+    ],
+    [
+      "@agent-infra/mcp-*"
+    ]
+  ],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "UI-TARs-desktop",
+    "UI-TARs-desktop-renderer",
+    "@common/*",
+    "@agent-infra/mcp-benchmark"
+  ]
+}
