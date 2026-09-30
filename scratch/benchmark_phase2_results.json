@@ -1,0 +1,561 @@
+[
+  {
+    "run": 1,
+    "durationMs": 180300,
+    "durationSec": "180.30",
+    "vlmCalls": 31,
+    "screenshots": 16,
+    "actionsCount": 15,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0,0.95,0,0.95]",
+          "start_coords": [
+            0,
+            855
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad\\n"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.1,0.05,0.1,0.05]",
+          "start_coords": [
+            144,
+            45
+          ]
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "ORBIT_SPEED_TEST_123"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.15,0.05,0.15,0.05]",
+          "start_coords": [
+            216,
+            45
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.2,0.05,0.2,0.05]",
+          "start_coords": [
+            288,
+            45
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.25,0.05,0.25,0.05]",
+          "start_coords": [
+            360,
+            45
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.3,0.05,0.3,0.05]",
+          "start_coords": [
+            432,
+            45
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.35,0.05,0.35,0.05]",
+          "start_coords": [
+            504,
+            45
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.05,0.05,0.05,0.05]",
+          "start_coords": [
+            72,
+            45
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.6,0.6,0.6,0.6]",
+          "start_coords": [
+            864,
+            540
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.55,0.6,0.55,0.6]",
+          "start_coords": [
+            792,
+            540
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.75,0.25,0.75,0.25]",
+          "start_coords": [
+            1080,
+            225
+          ]
+        }
+      }
+    ],
+    "nativeInputExecutionTimeMs": 2087.57,
+    "fallbackCount": 0,
+    "runStatus": "TIMED_OUT",
+    "notepadDetected": true,
+    "actualSuccess": false
+  },
+  {
+    "run": 2,
+    "durationMs": 138495,
+    "durationSec": "138.50",
+    "vlmCalls": 28,
+    "screenshots": 14,
+    "actionsCount": 14,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.1,0.1,0.1,0.1]",
+          "start_coords": [
+            144,
+            90
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.05,0.05,0.05,0.05]",
+          "start_coords": [
+            72,
+            45
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.2,0.3,0.2,0.3]",
+          "start_coords": [
+            288,
+            270
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.2,0.3,0.2,0.3]",
+          "start_coords": [
+            288,
+            270
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.2,0.3,0.2,0.3]",
+          "start_coords": [
+            288,
+            270
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "call_user",
+        "inputs": {}
+      }
+    ],
+    "nativeInputExecutionTimeMs": 3794.37,
+    "fallbackCount": 0,
+    "runStatus": "CALL_USER",
+    "notepadDetected": false,
+    "actualSuccess": false
+  },
+  {
+    "run": 3,
+    "durationMs": 48910,
+    "durationSec": "48.91",
+    "vlmCalls": 12,
+    "screenshots": 6,
+    "actionsCount": 6,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.01,0.01,0.01]",
+          "start_coords": [
+            14.4,
+            9
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad\\n"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.01,0.01,0.01]",
+          "start_coords": [
+            14.4,
+            9
+          ]
+        }
+      },
+      {
+        "type": "call_user",
+        "inputs": {}
+      }
+    ],
+    "nativeInputExecutionTimeMs": 4576.81,
+    "fallbackCount": 0,
+    "runStatus": "CALL_USER",
+    "notepadDetected": true,
+    "actualSuccess": true
+  },
+  {
+    "run": 4,
+    "durationMs": 184696,
+    "durationSec": "184.70",
+    "vlmCalls": 34,
+    "screenshots": 17,
+    "actionsCount": 17,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.05,0.05,0.05,0.05]",
+          "start_coords": [
+            72,
+            45
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad\\n"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad\\n"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad\\n"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "ORBIT_SPEED_TEST_123"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "ORBIT_SPEED_TEST_123"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.5,0.5,0.5,0.5]",
+          "start_coords": [
+            720,
+            450
+          ]
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "ORBIT_SPEED_TEST_123"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "ORBIT_SPEED_TEST_123"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "ORBIT_SPEED_TEST_123"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.5,0.9,0.5,0.9]",
+          "start_coords": [
+            720,
+            810
+          ]
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "ORBIT_SPEED_TEST_123"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "ORBIT_SPEED_TEST_123"
+        }
+      }
+    ],
+    "nativeInputExecutionTimeMs": 10931.22,
+    "fallbackCount": 0,
+    "runStatus": "TIMED_OUT",
+    "notepadDetected": true,
+    "actualSuccess": false
+  },
+  {
+    "run": 5,
+    "durationMs": 143911,
+    "durationSec": "143.91",
+    "vlmCalls": 26,
+    "screenshots": 13,
+    "actionsCount": 13,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.01,0.01,0.01]",
+          "start_coords": [
+            14.4,
+            9
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.1,0.2,0.1,0.2]",
+          "start_coords": [
+            144,
+            180
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.1,0.2,0.1,0.2]",
+          "start_coords": [
+            144,
+            180
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "type",
+        "inputs": {
+          "content": "Notepad"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.1,0.2,0.1,0.2]",
+          "start_coords": [
+            144,
+            180
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "call_user",
+        "inputs": {}
+      }
+    ],
+    "nativeInputExecutionTimeMs": 12648.39,
+    "fallbackCount": 0,
+    "runStatus": "CALL_USER",
+    "notepadDetected": false,
+    "actualSuccess": false
+  }
+]

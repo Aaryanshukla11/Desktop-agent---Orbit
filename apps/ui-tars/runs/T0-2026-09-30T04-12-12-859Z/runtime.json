@@ -1,0 +1,718 @@
+[
+  {
+    "loop": 0,
+    "vlm_raw_response": "```\nThought: I need to click on the first search result link to proceed with booking the ticket.\nAction: click(start_box='[100, 400, 100, 400]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "I need to click on the first search result link to proceed with booking the ticket.",
+      "action_type": "click",
+      "action_inputs": {
+        "start_box": "[0.1,0.4,0.1,0.4]",
+        "start_coords": [
+          144,
+          360
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.4,
+      0.1,
+      0.4
+    ],
+    "actual_screen_coordinates": null,
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:12:19.342Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 1,
+    "vlm_raw_response": "```\nThought: The click did not register. I will try clicking the link again to ensure it opens.\nAction: click(start_box='[100, 400, 100, 400]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The click did not register. I will try clicking the link again to ensure it opens.",
+      "action_type": "click",
+      "action_inputs": {
+        "start_box": "[0.1,0.4,0.1,0.4]",
+        "start_coords": [
+          144,
+          360
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.4,
+      0.1,
+      0.4
+    ],
+    "actual_screen_coordinates": [
+      144,
+      360
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:12:32.449Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 2,
+    "vlm_raw_response": "```\nThought: The click still did not register. I will try clicking slightly lower on the link to ensure it opens.\nAction: click(start_box='[100, 450, 100, 450]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The click still did not register. I will try clicking slightly lower on the link to ensure it opens.",
+      "action_type": "click",
+      "action_inputs": {
+        "start_box": "[0.1,0.45,0.1,0.45]",
+        "start_coords": [
+          144,
+          405
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.45,
+      0.1,
+      0.45
+    ],
+    "actual_screen_coordinates": [
+      144,
+      360
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:12:46.630Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 3,
+    "vlm_raw_response": "```\nThought: The click is still not registering. I will try a double-click to ensure the link opens.\nAction: left_double(start_box='[100, 450, 100, 450]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The click is still not registering. I will try a double-click to ensure the link opens.",
+      "action_type": "left_double",
+      "action_inputs": {
+        "start_box": "[0.1,0.45,0.1,0.45]",
+        "start_coords": [
+          144,
+          405
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.45,
+      0.1,
+      0.45
+    ],
+    "actual_screen_coordinates": [
+      144,
+      405
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:13:03.166Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 4,
+    "vlm_raw_response": "```\nThought: The link is still not opening. I will try right-clicking to see if there are any options to open the link.\nAction: right_single(start_box='[100, 450, 100, 450]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The link is still not opening. I will try right-clicking to see if there are any options to open the link.",
+      "action_type": "right_single",
+      "action_inputs": {
+        "start_box": "[0.1,0.45,0.1,0.45]",
+        "start_coords": [
+          144,
+          405
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.45,
+      0.1,
+      0.45
+    ],
+    "actual_screen_coordinates": [
+      144,
+      405
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:13:23.530Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 5,
+    "vlm_raw_response": "```\nThought: The right-click menu is open, but it doesn't show options to open the link. I will try scrolling down to see if there are more options.\nAction: scroll(start_box='[100, 450, 100, 450]', direction='down')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The right-click menu is open, but it doesn't show options to open the link. I will try scrolling down to see if there are more options.",
+      "action_type": "scroll",
+      "action_inputs": {
+        "start_box": "[0.1,0.45,0.1,0.45]",
+        "start_coords": [
+          144,
+          405
+        ],
+        "direction": "down"
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.45,
+      0.1,
+      0.45
+    ],
+    "actual_screen_coordinates": [
+      144,
+      405
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:13:43.168Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 6,
+    "vlm_raw_response": "```\nThought: I see another link for booking flights at EaseMyTrip. I will click on this link to proceed with booking.\nAction: click(start_box='[100, 600, 100, 600]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "I see another link for booking flights at EaseMyTrip. I will click on this link to proceed with booking.",
+      "action_type": "click",
+      "action_inputs": {
+        "start_box": "[0.1,0.6,0.1,0.6]",
+        "start_coords": [
+          144,
+          540
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.6,
+      0.1,
+      0.6
+    ],
+    "actual_screen_coordinates": [
+      144,
+      405
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:14:00.920Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 7,
+    "vlm_raw_response": "```\nThought: The click did not register. I will try double-clicking on the EaseMyTrip link to ensure it opens.\nAction: left_double(start_box='[100, 600, 100, 600]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The click did not register. I will try double-clicking on the EaseMyTrip link to ensure it opens.",
+      "action_type": "left_double",
+      "action_inputs": {
+        "start_box": "[0.1,0.6,0.1,0.6]",
+        "start_coords": [
+          144,
+          540
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.6,
+      0.1,
+      0.6
+    ],
+    "actual_screen_coordinates": [
+      144,
+      540
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:14:19.241Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 8,
+    "vlm_raw_response": "```\nThought: The double-click did not work. I will try right-clicking on the EaseMyTrip link to see if there are any options to open it.\nAction: right_single(start_box='[100, 600, 100, 600]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The double-click did not work. I will try right-clicking on the EaseMyTrip link to see if there are any options to open it.",
+      "action_type": "right_single",
+      "action_inputs": {
+        "start_box": "[0.1,0.6,0.1,0.6]",
+        "start_coords": [
+          144,
+          540
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.6,
+      0.1,
+      0.6
+    ],
+    "actual_screen_coordinates": [
+      144,
+      540
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:14:40.756Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 9,
+    "vlm_raw_response": "```\nThought: The right-click menu is open, but it doesn't show an option to open the link. I will try scrolling further down to find more options.\nAction: scroll(start_box='[100, 600, 100, 600]', direction='down')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The right-click menu is open, but it doesn't show an option to open the link. I will try scrolling further down to find more options.",
+      "action_type": "scroll",
+      "action_inputs": {
+        "start_box": "[0.1,0.6,0.1,0.6]",
+        "start_coords": [
+          144,
+          540
+        ],
+        "direction": "down"
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.6,
+      0.1,
+      0.6
+    ],
+    "actual_screen_coordinates": [
+      144,
+      540
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:14:59.282Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 10,
+    "vlm_raw_response": "```\nThought: I see a link for Skyscanner India. I will click on this link to proceed with booking the flight.\nAction: click(start_box='[100, 700, 100, 700]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "I see a link for Skyscanner India. I will click on this link to proceed with booking the flight.",
+      "action_type": "click",
+      "action_inputs": {
+        "start_box": "[0.1,0.7,0.1,0.7]",
+        "start_coords": [
+          144,
+          630
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.7,
+      0.1,
+      0.7
+    ],
+    "actual_screen_coordinates": [
+      144,
+      540
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:15:15.458Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 11,
+    "vlm_raw_response": "```\nThought: It seems I accidentally navigated to the settings page. I need to return to the browser to continue booking the flight.\nAction: hotkey(key='alt tab')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "It seems I accidentally navigated to the settings page. I need to return to the browser to continue booking the flight.",
+      "action_type": "hotkey",
+      "action_inputs": {
+        "key": "alt tab"
+      }
+    },
+    "normalized_coordinates": null,
+    "actual_screen_coordinates": [
+      144,
+      630
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:15:34.300Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 12,
+    "vlm_raw_response": "```\nThought: I am back on the browser page. I will try clicking on the Skyscanner India link again to proceed with booking.\nAction: click(start_box='[100, 700, 100, 700]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "I am back on the browser page. I will try clicking on the Skyscanner India link again to proceed with booking.",
+      "action_type": "click",
+      "action_inputs": {
+        "start_box": "[0.1,0.7,0.1,0.7]",
+        "start_coords": [
+          144,
+          630
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.7,
+      0.1,
+      0.7
+    ],
+    "actual_screen_coordinates": null,
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:15:51.619Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 13,
+    "vlm_raw_response": "```\nThought: The click did not register. I will try double-clicking on the Skyscanner India link to ensure it opens.\nAction: left_double(start_box='[100, 700, 100, 700]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The click did not register. I will try double-clicking on the Skyscanner India link to ensure it opens.",
+      "action_type": "left_double",
+      "action_inputs": {
+        "start_box": "[0.1,0.7,0.1,0.7]",
+        "start_coords": [
+          144,
+          630
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.7,
+      0.1,
+      0.7
+    ],
+    "actual_screen_coordinates": [
+      144,
+      630
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:16:11.177Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 14,
+    "vlm_raw_response": "```\nThought: The double-click did not work. I will try right-clicking on the Skyscanner India link to see if there are any options to open it.\nAction: right_single(start_box='[100, 700, 100, 700]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The double-click did not work. I will try right-clicking on the Skyscanner India link to see if there are any options to open it.",
+      "action_type": "right_single",
+      "action_inputs": {
+        "start_box": "[0.1,0.7,0.1,0.7]",
+        "start_coords": [
+          144,
+          630
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.7,
+      0.1,
+      0.7
+    ],
+    "actual_screen_coordinates": [
+      144,
+      630
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:16:32.362Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 15,
+    "vlm_raw_response": "```\nThought: The right-click menu is open, but it doesn't show an option to open the link. I will try scrolling further down to find more options.\nAction: scroll(start_box='[100, 700, 100, 700]', direction='down')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The right-click menu is open, but it doesn't show an option to open the link. I will try scrolling further down to find more options.",
+      "action_type": "scroll",
+      "action_inputs": {
+        "start_box": "[0.1,0.7,0.1,0.7]",
+        "start_coords": [
+          144,
+          630
+        ],
+        "direction": "down"
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.7,
+      0.1,
+      0.7
+    ],
+    "actual_screen_coordinates": [
+      144,
+      630
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:16:49.561Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 16,
+    "vlm_raw_response": "```\nThought: I see a link for MakeMyTrip. I will click on this link to proceed with booking the flight.\nAction: click(start_box='[100, 800, 100, 800]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "I see a link for MakeMyTrip. I will click on this link to proceed with booking the flight.",
+      "action_type": "click",
+      "action_inputs": {
+        "start_box": "[0.1,0.8,0.1,0.8]",
+        "start_coords": [
+          144,
+          720
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.8,
+      0.1,
+      0.8
+    ],
+    "actual_screen_coordinates": [
+      144,
+      630
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:17:05.228Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 17,
+    "vlm_raw_response": "```\nThought: The click did not register. I will try double-clicking on the MakeMyTrip link to ensure it opens.\nAction: left_double(start_box='[100, 800, 100, 800]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The click did not register. I will try double-clicking on the MakeMyTrip link to ensure it opens.",
+      "action_type": "left_double",
+      "action_inputs": {
+        "start_box": "[0.1,0.8,0.1,0.8]",
+        "start_coords": [
+          144,
+          720
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.8,
+      0.1,
+      0.8
+    ],
+    "actual_screen_coordinates": [
+      144,
+      720
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:17:25.812Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 18,
+    "vlm_raw_response": "```\nThought: The double-click did not work. I will try right-clicking on the MakeMyTrip link to see if there are any options to open it.\nAction: right_single(start_box='[100, 800, 100, 800]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The double-click did not work. I will try right-clicking on the MakeMyTrip link to see if there are any options to open it.",
+      "action_type": "right_single",
+      "action_inputs": {
+        "start_box": "[0.1,0.8,0.1,0.8]",
+        "start_coords": [
+          144,
+          720
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.8,
+      0.1,
+      0.8
+    ],
+    "actual_screen_coordinates": [
+      144,
+      720
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:17:47.107Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 19,
+    "vlm_raw_response": "```\nThought: The right-click menu is open, but it doesn't show an option to open the link. I will try scrolling further down to find more options.\nAction: scroll(start_box='[100, 800, 100, 800]', direction='down')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The right-click menu is open, but it doesn't show an option to open the link. I will try scrolling further down to find more options.",
+      "action_type": "scroll",
+      "action_inputs": {
+        "start_box": "[0.1,0.8,0.1,0.8]",
+        "start_coords": [
+          144,
+          720
+        ],
+        "direction": "down"
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.8,
+      0.1,
+      0.8
+    ],
+    "actual_screen_coordinates": [
+      144,
+      720
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:18:09.357Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 20,
+    "vlm_raw_response": "```\nThought: I need to scroll further down to find more options for booking the flight.\nAction: scroll(start_box='[100, 800, 100, 800]', direction='down')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "I need to scroll further down to find more options for booking the flight.",
+      "action_type": "scroll",
+      "action_inputs": {
+        "start_box": "[0.1,0.8,0.1,0.8]",
+        "start_coords": [
+          144,
+          720
+        ],
+        "direction": "down"
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.8,
+      0.1,
+      0.8
+    ],
+    "actual_screen_coordinates": [
+      144,
+      720
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:18:27.945Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 21,
+    "vlm_raw_response": "```\nThought: I see a link for MakeMyTrip with flight details. I will click on this link to proceed with booking.\nAction: click(start_box='[100, 900, 100, 900]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "I see a link for MakeMyTrip with flight details. I will click on this link to proceed with booking.",
+      "action_type": "click",
+      "action_inputs": {
+        "start_box": "[0.1,0.9,0.1,0.9]",
+        "start_coords": [
+          144,
+          810
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.9,
+      0.1,
+      0.9
+    ],
+    "actual_screen_coordinates": [
+      144,
+      720
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:18:44.553Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 22,
+    "vlm_raw_response": "```\nThought: The click did not register. I will try double-clicking on the MakeMyTrip link to ensure it opens.\nAction: left_double(start_box='[100, 900, 100, 900]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The click did not register. I will try double-clicking on the MakeMyTrip link to ensure it opens.",
+      "action_type": "left_double",
+      "action_inputs": {
+        "start_box": "[0.1,0.9,0.1,0.9]",
+        "start_coords": [
+          144,
+          810
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.9,
+      0.1,
+      0.9
+    ],
+    "actual_screen_coordinates": [
+      144,
+      810
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:19:02.704Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 23,
+    "vlm_raw_response": "```\nThought: The double-click did not work. I will try right-clicking on the MakeMyTrip link to see if there are any options to open it.\nAction: right_single(start_box='[100, 900, 100, 900]')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The double-click did not work. I will try right-clicking on the MakeMyTrip link to see if there are any options to open it.",
+      "action_type": "right_single",
+      "action_inputs": {
+        "start_box": "[0.1,0.9,0.1,0.9]",
+        "start_coords": [
+          144,
+          810
+        ]
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.9,
+      0.1,
+      0.9
+    ],
+    "actual_screen_coordinates": [
+      144,
+      810
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:19:23.171Z",
+    "verification_result": "IN_PROGRESS"
+  },
+  {
+    "loop": 24,
+    "vlm_raw_response": "```\nThought: The right-click menu does not have an option to open the link. I will try scrolling further down to find more options.\nAction: scroll(start_box='[100, 900, 100, 900]', direction='down')\n```",
+    "parsed_action": {
+      "reflection": null,
+      "thought": "The right-click menu does not have an option to open the link. I will try scrolling further down to find more options.",
+      "action_type": "scroll",
+      "action_inputs": {
+        "start_box": "[0.1,0.9,0.1,0.9]",
+        "start_coords": [
+          144,
+          810
+        ],
+        "direction": "down"
+      }
+    },
+    "normalized_coordinates": [
+      0.1,
+      0.9,
+      0.1,
+      0.9
+    ],
+    "actual_screen_coordinates": [
+      144,
+      810
+    ],
+    "action_execution_result": "running",
+    "screenshot_timestamp": "2026-09-30T04:19:40.872Z",
+    "verification_result": "error"
+  }
+]

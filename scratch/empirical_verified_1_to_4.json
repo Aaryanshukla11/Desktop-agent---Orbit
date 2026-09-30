@@ -1,0 +1,29 @@
+{
+    "Test1":  {
+                  "Status":  "PASS",
+                  "Text":  "Hello ORBIT",
+                  "Method":  "Native Win32 SendInput typing",
+                  "DurationMs":  169,
+                  "Screenshot":  "scratch\\test1_notepad_verified.jpg"
+              },
+    "Test2":  {
+                  "Status":  "PASS",
+                  "Data":  "10/09/2026, 12/09/2026, 15/09/2026 (each on separate row)",
+                  "LiteralNewline":  "None",
+                  "Method":  "Fast Clipboard Paste",
+                  "DurationMs":  153,
+                  "Screenshot":  "scratch\\test2_excel_dates_verified.jpg"
+              },
+    "Test3":  {
+                  "Status":  "PASS",
+                  "Data":  "Date\u003cTAB\u003eSales, 10/09/2026\u003cTAB\u003e100, etc. distributed into rows and columns",
+                  "Method":  "Fast Clipboard Paste",
+                  "DurationMs":  157,
+                  "Screenshot":  "scratch\\test3_excel_tabular_verified.jpg"
+              },
+    "Test4":  {
+                  "Status":  "PASS",
+                  "MultilineDatesPasteDurationMs":  153,
+                  "TabularPasteDurationMs":  157
+              }
+}

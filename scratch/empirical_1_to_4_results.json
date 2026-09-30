@@ -1,0 +1,36 @@
+{
+    "Test1":  {
+                  "Status":  "PASS",
+                  "Description":  "Short text typing: Hello ORBIT",
+                  "Method":  "Native Win32 SendInput typing",
+                  "MeasuredDurationMs":  3,
+                  "Screenshot":  "scratch\\test1_notepad_empirical.jpg"
+              },
+    "Test2":  {
+                  "Status":  "FAIL",
+                  "Description":  "Excel Multiline Dates (10/09/2026, 12/09/2026, 15/09/2026)",
+                  "Method":  "Fast Clipboard Paste",
+                  "A1":  "",
+                  "A2":  "",
+                  "A3":  "",
+                  "Literal_n_Appears":  false,
+                  "MeasuredDurationMs":  0,
+                  "Screenshot":  "scratch\\test2_excel_dates_empirical.jpg"
+              },
+    "Test3":  {
+                  "Status":  "FAIL",
+                  "Description":  "Excel Tabular Data (Rows and Columns distribution)",
+                  "Method":  "Fast Clipboard Paste",
+                  "Row1":  "C1=\u0027\u0027, D1=\u0027\u0027",
+                  "Row2":  "C2=\u0027\u0027, D2=\u0027\u0027",
+                  "Row3":  "C3=\u0027\u0027, D3=\u0027\u0027",
+                  "Row4":  "C4=\u0027\u0027, D4=\u0027\u0027",
+                  "Screenshot":  "scratch\\test3_excel_tabular_empirical.jpg"
+              },
+    "Test4":  {
+                  "Status":  "PASS",
+                  "Description":  "Actual execution time for multiline/table paste",
+                  "MultilineDatesPasteDurationMs":  0,
+                  "TabularPasteDurationMs":  0
+              }
+}

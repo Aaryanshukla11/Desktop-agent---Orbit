@@ -1,0 +1,229 @@
+[
+  {
+    "run": 1,
+    "durationMs": 65887,
+    "durationSec": "65.89",
+    "vlmCalls": 12,
+    "screenshots": 6,
+    "actionsCount": 6,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.01,0.01,0.01]",
+          "start_coords": [
+            14.4,
+            9
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.5,0.98,0.5,0.98]",
+          "start_coords": [
+            720,
+            882
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+s"
+        }
+      },
+      {
+        "type": "call_user",
+        "inputs": {}
+      }
+    ],
+    "runStatus": "CALL_USER",
+    "notepadDetected": false,
+    "success": false
+  },
+  {
+    "run": 2,
+    "durationMs": 47822,
+    "durationSec": "47.82",
+    "vlmCalls": 10,
+    "screenshots": 5,
+    "actionsCount": 5,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.01,0.01,0.01]",
+          "start_coords": [
+            14.4,
+            9
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+s"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "call_user",
+        "inputs": {}
+      }
+    ],
+    "runStatus": "CALL_USER",
+    "notepadDetected": false,
+    "success": false
+  },
+  {
+    "run": 3,
+    "durationMs": 50499,
+    "durationSec": "50.50",
+    "vlmCalls": 10,
+    "screenshots": 5,
+    "actionsCount": 5,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.01,0.01,0.01]",
+          "start_coords": [
+            14.4,
+            9
+          ]
+        }
+      },
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.99,0.01,0.99]",
+          "start_coords": [
+            14.4,
+            891
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "call_user",
+        "inputs": {}
+      }
+    ],
+    "runStatus": "CALL_USER",
+    "notepadDetected": false,
+    "success": false
+  },
+  {
+    "run": 4,
+    "durationMs": 38975,
+    "durationSec": "38.98",
+    "vlmCalls": 8,
+    "screenshots": 4,
+    "actionsCount": 4,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.01,0.01,0.01]",
+          "start_coords": [
+            14.4,
+            9
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "call_user",
+        "inputs": {}
+      }
+    ],
+    "runStatus": "CALL_USER",
+    "notepadDetected": false,
+    "success": false
+  },
+  {
+    "run": 5,
+    "durationMs": 41621,
+    "durationSec": "41.62",
+    "vlmCalls": 8,
+    "screenshots": 4,
+    "actionsCount": 4,
+    "actions": [
+      {
+        "type": "click",
+        "inputs": {
+          "start_box": "[0.01,0.01,0.01,0.01]",
+          "start_coords": [
+            14.4,
+            9
+          ]
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win"
+        }
+      },
+      {
+        "type": "hotkey",
+        "inputs": {
+          "key": "win+r"
+        }
+      },
+      {
+        "type": "call_user",
+        "inputs": {}
+      }
+    ],
+    "runStatus": "CALL_USER",
+    "notepadDetected": false,
+    "success": false
+  }
+]

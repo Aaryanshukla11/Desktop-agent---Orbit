@@ -1,0 +1,20 @@
+{
+  "t1": {
+    "method": "SENDINPUT_TYPING",
+    "durationMs": 92,
+    "textInserted": "Hello ORBIT"
+  },
+  "t2": {
+    "method": "CLIPBOARD_PASTE",
+    "durationMs": 358,
+    "textInserted": "10/09/2026\n12/09/2026\n15/09/2026"
+  },
+  "t3": {
+    "method": "CLIPBOARD_PASTE",
+    "durationMs": 358,
+    "textInserted": "Date\tSales\n10/09/2026\t100\n12/09/2026\t150\n15/09/2026\t200"
+  },
+  "test1Img": "C:\\Users\\Aaryan shukla\\OneDrive\\Desktop\\UI-TARS-desktop-main\\scratch\\test1_notepad_hello_orbit.jpg",
+  "test2Img": "C:\\Users\\Aaryan shukla\\OneDrive\\Desktop\\UI-TARS-desktop-main\\scratch\\test2_excel_dates.jpg",
+  "test3Img": "C:\\Users\\Aaryan shukla\\OneDrive\\Desktop\\UI-TARS-desktop-main\\scratch\\test3_excel_tabular.jpg"
+}
