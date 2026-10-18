@@ -4,7 +4,7 @@
 import path from 'node:path';
 import { AppUpdater } from '@main/utils/updateApp';
 
-import { BrowserWindow, app, shell } from 'electron';
+import { BrowserWindow, app, shell, nativeImage } from 'electron';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
@@ -32,12 +32,18 @@ export function createWindow({
     show: false,
     width,
     height,
+    resizable: true,
+    maximizable: true,
+    minimizable: true,
+    fullscreenable: true,
     movable: true,
     alwaysOnTop: false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       sandbox: false,
-      webSecurity: !!env.isDev,
+      webSecurity: true,
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   };
 
@@ -57,11 +63,28 @@ export function createWindow({
       break;
     }
     case env.isWindows: {
+      const pathsToTry = [
+        path.join(app.getAppPath(), 'resources/icon.ico'),
+        path.join(app.getAppPath(), 'resources/icon.png'),
+        path.join(__dirname, '../../resources/icon.ico'),
+        path.join(__dirname, '../../resources/icon.png'),
+      ];
+      let winIcon = nativeImage.createEmpty();
+      for (const p of pathsToTry) {
+        const candidate = nativeImage.createFromPath(p);
+        if (!candidate.isEmpty()) {
+          winIcon = candidate;
+          break;
+        }
+      }
       baseWindowConfig = {
         ...baseWindowConfig,
-        icon,
+        icon: !winIcon.isEmpty() ? winIcon : icon,
         autoHideMenuBar: true,
         frame: true,
+        backgroundMaterial: 'mica',
+        resizable: true,
+        maximizable: true,
       };
       break;
     }
@@ -81,12 +104,53 @@ export function createWindow({
     browserWindowConfig,
   );
   const browserWindow = new BrowserWindow(browserWindowConfig);
+  browserWindow.setResizable(true);
+  browserWindow.setMaximizable(true);
+
+  if (env.isWindows) {
+    const pathsToTry = [
+      path.join(app.getAppPath(), 'resources/icon.ico'),
+      path.join(app.getAppPath(), 'resources/icon.png'),
+      path.join(__dirname, '../../resources/icon.ico'),
+      path.join(__dirname, '../../resources/icon.png'),
+    ];
+    for (const p of pathsToTry) {
+      const candidate = nativeImage.createFromPath(p);
+      if (!candidate.isEmpty()) {
+        browserWindow.setIcon(candidate);
+        break;
+      }
+    }
+  }
+
+  // Prevent unauthorized in-window navigation
+  browserWindow.webContents.on('will-navigate', (event, targetUrl) => {
+    try {
+      const parsed = new URL(targetUrl);
+      if (
+        !app.isPackaged &&
+        env.rendererUrl &&
+        targetUrl.startsWith(env.rendererUrl)
+      ) {
+        return; // Allow local dev server
+      }
+      if (parsed.protocol === 'file:') {
+        return; // Allow packaged local app file navigation
+      }
+      logger.warn('[createWindow] Blocked unauthorized window navigation:', targetUrl);
+      event.preventDefault();
+    } catch {
+      event.preventDefault();
+    }
+  });
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   console.log('renderer url', env.rendererUrl);
   if (!app.isPackaged && env.rendererUrl) {
-    browserWindow.loadURL(env.rendererUrl + routerPath);
+    const base = env.rendererUrl.replace(/\/+$/, '');
+    const cleanPath = routerPath.startsWith('/') ? routerPath : `/${routerPath}`;
+    browserWindow.loadURL(`${base}${cleanPath}`);
   } else {
     browserWindow.loadFile(path.join(__dirname, '../renderer/index.html'), {
       hash: routerPath,
@@ -107,7 +171,19 @@ export function createWindow({
   menuBuilder.buildMenu();
 
   browserWindow.webContents.setWindowOpenHandler((edata) => {
-    shell.openExternal(edata.url);
+    try {
+      const parsed = new URL(edata.url);
+      if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+        shell.openExternal(edata.url);
+      } else {
+        logger.warn(
+          '[createWindow] Blocked non-http(s) window open request:',
+          edata.url,
+        );
+      }
+    } catch (e) {
+      logger.warn('[createWindow] Invalid URL in window open request:', edata.url);
+    }
     return { action: 'deny' };
   });
 

@@ -23,7 +23,7 @@ import { OrbitHeader } from './nav-header';
 import { Operator } from '@main/store/types';
 import { useGlobalSettings, GlobalSettings } from '../Settings/global';
 import { useStore } from '../../hooks/useStore';
-import { StatusEnum } from '@ui-tars/sdk';
+import { StatusEnum } from '@UI-TARs/sdk';
 import { NavDialog } from '../AlertDialog/navDialog';
 import { api } from '../../api';
 
@@ -139,17 +139,17 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
 
   return (
     <>
-      <Sidebar collapsible="icon" className="select-none" {...props}>
+      <Sidebar collapsible="icon" className="select-none orbit-glass-sidebar !border-r-black/10 dark:!border-r-white/10" {...props}>
         <DragArea></DragArea>
-        <SidebarHeader>
+        <SidebarHeader className="pt-3.5 px-2">
           <OrbitHeader showTrigger={location.pathname === '/'} />
           <SidebarMenu className="items-center">
             <SidebarMenuButton
-              className="font-medium"
+              className={`font-medium rounded-xl transition-all duration-200 ${location.pathname === '/' ? 'bg-black/10 dark:bg-white/10 text-slate-900 dark:text-white border border-black/10 dark:border-white/15 shadow-sm backdrop-blur-md' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'}`}
               onClick={handleHomeClick}
             >
               <Home />
-              Home
+              <span>Home</span>
             </SidebarMenuButton>
           </SidebarMenu>
         </SidebarHeader>

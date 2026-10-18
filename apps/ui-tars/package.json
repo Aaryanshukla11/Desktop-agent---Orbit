@@ -15,7 +15,7 @@
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --pretty --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
-    "dev": "electron-vite dev",
+    "dev": "electron-vite dev -w",
     "debug": "electron-vite dev --sourcemap --remote-debugging-port=9222",
     "debug:w": "electron-vite dev -w --sourcemap --remote-debugging-port=9222",
     "dev:w": "electron-vite dev -w",

@@ -1,7 +1,7 @@
 /**
  
  */
-import { initIpc } from '@ui-tars/electron-ipc/main';
+import { initIpc } from '@UI-TARs/electron-ipc/main';
 import { checkBrowserAvailability } from '../services/browserCheck';
 
 const t = initIpc.create();

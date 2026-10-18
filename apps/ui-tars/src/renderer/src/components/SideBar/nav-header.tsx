@@ -4,11 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Wifi, Copy, Check } from 'lucide-react';
 
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarTrigger,
-} from '@renderer/components/ui/sidebar';
+import { SidebarTrigger } from '@renderer/components/ui/sidebar';
 
 import logoVector from '@resources/logo-vector.png?url';
 
@@ -45,36 +41,38 @@ export function OrbitHeader({ showTrigger }: HeaderProps) {
   };
 
   return (
-    <SidebarMenu className="items-center">
-      <SidebarMenuButton
-        className="group-data-[collapsible=icon]:p-0! mb-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-transparent"
-      >
-        <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-          <img src={logoVector} alt="" />
+    <div className="relative flex items-center justify-between w-full px-2 pt-1 pb-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+      <div className="flex items-center gap-2.5 min-w-0 group-data-[collapsible=icon]:justify-center">
+        <div className="flex aspect-square size-8 items-center justify-center shrink-0">
+          <img src={logoVector} alt="ORBIT" className="size-8 object-contain" />
         </div>
-        <div className="grid flex-1 text-left text-sm leading-tight">
-          <span className="truncate font-semibold">ORBIT</span>
-          <span className="truncate text-xs pb-[1px]">Playground</span>
+        <div className="flex flex-col min-w-0 text-left group-data-[collapsible=icon]:hidden">
+          <span className="font-semibold text-sm text-slate-900 dark:text-white tracking-wide leading-tight truncate">
+            ORBIT
+          </span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal leading-tight truncate">
+            Playground
+          </span>
           {lanIp && (
             <div
               onClick={copyUrl}
               title={`Click to copy: http://${lanIp}:5173\nOpen this link on any phone or device on the same network`}
-              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer mt-0.5"
+              className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer mt-1 transition-colors"
             >
-              <Wifi className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
-              <span className="truncate">{lanIp}:5173</span>
+              <Wifi className="w-2.5 h-2.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+              <span className="truncate font-mono">{lanIp}:5173</span>
               {copied ? (
-                <Check className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
+                <Check className="w-2.5 h-2.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
               ) : (
                 <Copy className="w-2.5 h-2.5 opacity-60 hover:opacity-100 shrink-0" />
               )}
             </div>
           )}
         </div>
-      </SidebarMenuButton>
+      </div>
       {showTrigger && (
-        <SidebarTrigger className="absolute top-12 right-2 group-data-[collapsible=icon]:right-[-36px]" />
+        <SidebarTrigger className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white shrink-0 ml-auto group-data-[collapsible=icon]:hidden" />
       )}
-    </SidebarMenu>
+    </div>
   );
 }

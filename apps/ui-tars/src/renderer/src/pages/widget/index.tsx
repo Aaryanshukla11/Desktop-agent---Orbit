@@ -20,7 +20,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '@renderer/api';
 
 import './widget.css';
-import { StatusEnum } from '@ui-tars/sdk';
+import { StatusEnum } from '@UI-TARs/sdk';
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Navigator/platform
 // chrome 93 support

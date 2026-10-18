@@ -1,7 +1,7 @@
 /*
  
  */
-import { initIpc } from '@ui-tars/electron-ipc/main';
+import { initIpc } from '@UI-TARs/electron-ipc/main';
 import { ProxyClient } from '../remote/proxyClient';
 
 const t = initIpc.create();

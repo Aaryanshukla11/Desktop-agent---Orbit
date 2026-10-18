@@ -1,7 +1,7 @@
 /*
  
  */
-import { Conversation } from '@ui-tars/shared/types';
+import { Conversation } from '@UI-TARs/shared/types';
 
 export interface ConversationWithSoM extends Conversation {
   screenshotBase64WithElementMarker?: string;

@@ -49,9 +49,9 @@ const getIcon = (operator: Operator, isActive: boolean) => {
 
   return (
     <div className="relative flex items-center gap-1">
-      <MainIcon className="w-4 h-4" />
+      <MainIcon className={`w-4 h-4 ${isActive ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`} />
       <div
-        className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full text-[6px] flex items-center justify-center font-bold leading-none bg-white border border-gray-500 ${isActive ? 'text-neutral-700 border-neutral-700' : 'text-neutral-500 border-neutral-500'}`}
+        className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full text-[6px] flex items-center justify-center font-bold leading-none bg-slate-200 dark:bg-slate-900 border ${isActive ? 'text-cyan-700 dark:text-cyan-300 border-cyan-500/60' : 'text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'}`}
       >
         {isRemote ? 'R' : 'L'}
       </div>
@@ -103,7 +103,7 @@ export function NavHistory({
             <SidebarMenuItem className="w-full flex flex-col items-center">
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton
-                  className="!pr-2 font-medium"
+                  className="!pr-2 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors"
                   onClick={handleHistory}
                 >
                   <History strokeWidth={2} />
@@ -116,14 +116,14 @@ export function NavHistory({
                   {history.map((item) => (
                     <SidebarMenuSubItem key={item.id} className="group/item">
                       <SidebarMenuSubButton
-                        className={`hover:bg-neutral-100 hover:text-neutral-600 py-5 cursor-pointer ${item.id === currentSessionId ? 'text-neutral-700 bg-white hover:bg-white' : 'text-neutral-500'}`}
+                        className={`rounded-xl py-5 cursor-pointer transition-all duration-200 ${item.id === currentSessionId ? 'text-slate-900 dark:text-white bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/15 backdrop-blur-md shadow-sm font-medium' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'}`}
                         onClick={() => onSessionClick(item.id)}
                       >
                         {getIcon(
                           item.meta.operator,
                           item.id === currentSessionId,
                         )}
-                        <span className="max-w-38">{item.name}</span>
+                        <span className="max-w-38 truncate">{item.name}</span>
                       </SidebarMenuSubButton>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

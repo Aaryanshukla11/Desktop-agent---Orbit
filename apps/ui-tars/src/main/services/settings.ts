@@ -1,6 +1,3 @@
-/**
- 
- */
 import { ipcMain } from 'electron';
 import { SettingStore } from '../store/setting';
 import { logger } from '../logger';
@@ -9,33 +6,45 @@ import {
   validateSettingUpdate,
   isMaskedSecret,
 } from '@main/store/validate';
+import { isTrustedRendererFrame } from '../utils/security';
+
+function assertTrustedFrame(senderFrame: Electron.WebFrameMain | null | undefined, channel: string) {
+  if (!isTrustedRendererFrame(senderFrame)) {
+    logger.warn(`[settings] Unauthorized IPC call to ${channel} from frame: ${senderFrame?.url}`);
+    throw new Error('Unauthorized IPC sender');
+  }
+}
 
 export function registerSettingsHandlers() {
   /**
    * Get setting
    */
-  ipcMain.handle('setting:get', () => {
+  ipcMain.handle('setting:get', (event) => {
+    assertTrustedFrame(event.senderFrame, 'setting:get');
     return SettingStore.getStore();
   });
 
   /**
    * Clear setting
    */
-  ipcMain.handle('setting:clear', () => {
+  ipcMain.handle('setting:clear', (event) => {
+    assertTrustedFrame(event.senderFrame, 'setting:clear');
     SettingStore.clear();
   });
 
   /**
    * Reset setting preset
    */
-  ipcMain.handle('setting:resetPreset', () => {
+  ipcMain.handle('setting:resetPreset', (event) => {
+    assertTrustedFrame(event.senderFrame, 'setting:resetPreset');
     SettingStore.getInstance().delete('presetSource');
   });
 
   /**
    * Update setting
    */
-  ipcMain.handle('setting:update', async (_, settings: unknown) => {
+  ipcMain.handle('setting:update', async (event, settings: unknown) => {
+    assertTrustedFrame(event.senderFrame, 'setting:update');
     const validatedUpdate = validateSettingUpdate(settings);
     const current = SettingStore.getStore();
     if (
@@ -51,7 +60,8 @@ export function registerSettingsHandlers() {
   /**
    * Import setting preset from text
    */
-  ipcMain.handle('setting:importPresetFromText', async (_, yamlContent) => {
+  ipcMain.handle('setting:importPresetFromText', async (event, yamlContent) => {
+    assertTrustedFrame(event.senderFrame, 'setting:importPresetFromText');
     try {
       const newSettings = await SettingStore.importPresetFromText(yamlContent);
       SettingStore.setStore(newSettings);
@@ -64,7 +74,8 @@ export function registerSettingsHandlers() {
   /**
    * Import setting preset from url
    */
-  ipcMain.handle('setting:importPresetFromUrl', async (_, url, autoUpdate) => {
+  ipcMain.handle('setting:importPresetFromUrl', async (event, url, autoUpdate) => {
+    assertTrustedFrame(event.senderFrame, 'setting:importPresetFromUrl');
     try {
       const newSettings = await SettingStore.fetchPresetFromUrl(url);
       SettingStore.setStore({
@@ -85,7 +96,8 @@ export function registerSettingsHandlers() {
   /**
    * Update setting preset from url
    */
-  ipcMain.handle('setting:updatePresetFromRemote', async () => {
+  ipcMain.handle('setting:updatePresetFromRemote', async (event) => {
+    assertTrustedFrame(event.senderFrame, 'setting:updatePresetFromRemote');
     const settings = SettingStore.getStore();
     if (settings.presetSource?.type === 'remote' && settings.presetSource.url) {
       const newSettings = await SettingStore.fetchPresetFromUrl(
@@ -105,3 +117,4 @@ export function registerSettingsHandlers() {
     }
   });
 }
+

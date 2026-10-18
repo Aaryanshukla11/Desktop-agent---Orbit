@@ -22,7 +22,7 @@ import {
 const sseClients = new Set<http.ServerResponse>();
 let activeHttpServer: http.Server | null = null;
 
-// Cryptographically secure random session token for bridge server authentication
+// Cryptographically secure session token for bridge server authentication
 let activeBridgeToken: string =
   process.env.ORBIT_BRIDGE_TOKEN || crypto.randomBytes(32).toString('hex');
 
@@ -143,6 +143,8 @@ const ALLOWED_IPC_CHANNELS = new Set([
   'pauseRun',
   'resumeRun',
   'stopRun',
+  'setInstructions',
+  'clearHistory',
   'getEnsurePermissions',
   'getScreenSources',
   'getPrimaryScreen',
@@ -155,7 +157,7 @@ const ALLOWED_IPC_CHANNELS = new Set([
   'openBrowser',
 ]);
 
-export function startBridgeServer(port = 5174): http.Server {
+export function startBridgeServer(port = 5182): http.Server {
   const server = http.createServer(async (req, res) => {
     const origin = req.headers.origin;
 
@@ -195,6 +197,36 @@ export function startBridgeServer(port = 5174): http.Server {
       req.url || '/',
       `http://${req.headers.host || '127.0.0.1'}`,
     );
+
+    // GET / or browser HTML navigation - Redirect to the frontend Web UI with auth token prefilled
+    const isBrowserNavigation = (req.headers.accept || '').includes('text/html');
+    const isRootPath =
+      url.pathname === '/' || url.pathname === '' || url.pathname === '//';
+    if (req.method === 'GET' && (isRootPath || isBrowserNavigation)) {
+      const targetHost =
+        url.hostname === '127.0.0.1' || url.hostname === 'localhost'
+          ? 'localhost'
+          : url.hostname;
+      res.writeHead(302, {
+        Location: `http://${targetHost}:5173/?token=${getBridgeToken()}`,
+      });
+      res.end();
+      return;
+    }
+
+    // GET /api/token - Auto-authenticate loopback frontend requests
+    if (req.method === 'GET' && url.pathname === '/api/token') {
+      const remoteAddr = req.socket.remoteAddress || '';
+      const isLoopback =
+        remoteAddr === '127.0.0.1' ||
+        remoteAddr === '::1' ||
+        remoteAddr === '::ffff:127.0.0.1';
+      if (isLoopback) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ token: getBridgeToken() }));
+        return;
+      }
+    }
 
     // GET /api/ip - Returns available LAN IP addresses (informational, loopback-restricted)
     if (req.method === 'GET' && url.pathname === '/api/ip') {

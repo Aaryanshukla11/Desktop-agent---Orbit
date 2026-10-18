@@ -7,7 +7,11 @@ import { BrowserWindow, app, dialog, shell } from 'electron';
 import log from 'electron-log';
 
 export const logger = log.scope('main');
-log.initialize();
+try {
+  if (typeof log.initialize === 'function') {
+    log.initialize();
+  }
+} catch {}
 
 log.transports.file.level =
   process.env.NODE_ENV === 'development' ? 'debug' : 'info';
@@ -113,13 +117,15 @@ export async function exportLogs() {
   }
 }
 
-app.on('before-quit', () => {
-  // Remove the clearLogs call from app.on('before-quit')
-  // clearLogs();
-  log.transports.console.level = false;
-});
+try {
+  app?.on?.('before-quit', () => {
+    log.transports.console.level = false;
+  });
+} catch {}
 
 // Call cleanupOldLogs() when the app starts
-cleanupOldLogs().catch((error) => {
-  logger.error('Failed to cleanup logs on startup:', error);
-});
+try {
+  cleanupOldLogs().catch((error) => {
+    logger.error('Failed to cleanup logs on startup:', error);
+  });
+} catch {}

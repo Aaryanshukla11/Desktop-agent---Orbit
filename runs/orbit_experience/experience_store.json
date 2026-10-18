@@ -1,0 +1,334 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "id": "skill_notepad_quick_note",
+      "taskTitle": "Open Notepad and write note",
+      "keywords": [
+        "notepad",
+        "write",
+        "note",
+        "save",
+        "text"
+      ],
+      "apps": [
+        "Notepad"
+      ],
+      "workflow": [
+        {
+          "step": 1,
+          "action_type": "hotkey",
+          "summary": "Press Win+R to open Run dialog",
+          "action_inputs": {
+            "key": "win r"
+          }
+        },
+        {
+          "step": 2,
+          "action_type": "type",
+          "summary": "Launch notepad executable",
+          "action_inputs": {
+            "content": "notepad\\n"
+          }
+        },
+        {
+          "step": 3,
+          "action_type": "type",
+          "summary": "Type note contents into notepad body"
+        },
+        {
+          "step": 4,
+          "action_type": "hotkey",
+          "summary": "Press Ctrl+S to save",
+          "action_inputs": {
+            "key": "ctrl s"
+          }
+        }
+      ],
+      "pitfalls": [
+        "Do not search via Windows Start menu when Run dialog (Win+R) is available"
+      ],
+      "successCount": 10,
+      "failureCount": 0,
+      "createdAt": "2026-10-09T16:54:12.575Z",
+      "lastUsedAt": "2026-10-09T16:54:12.602Z"
+    },
+    {
+      "id": "skill_excel_blank_sheet",
+      "taskTitle": "Open Excel and enter tabular data",
+      "keywords": [
+        "excel",
+        "spreadsheet",
+        "data",
+        "table",
+        "sheet",
+        "calculate"
+      ],
+      "apps": [
+        "Excel"
+      ],
+      "workflow": [
+        {
+          "step": 1,
+          "action_type": "hotkey",
+          "summary": "Press Win+R to open Run dialog",
+          "action_inputs": {
+            "key": "win r"
+          }
+        },
+        {
+          "step": 2,
+          "action_type": "type",
+          "summary": "Launch Excel directly",
+          "action_inputs": {
+            "content": "excel\\n"
+          }
+        },
+        {
+          "step": 3,
+          "action_type": "hotkey",
+          "summary": "Press Enter to select Blank Workbook",
+          "action_inputs": {
+            "key": "enter"
+          }
+        },
+        {
+          "step": 4,
+          "action_type": "click",
+          "summary": "Click cell A1 or paste clipboard TSV data"
+        }
+      ],
+      "pitfalls": [
+        "Avoid typing cell-by-cell for large data; use direct clipboard paste with tab-separated values"
+      ],
+      "successCount": 8,
+      "failureCount": 0,
+      "createdAt": "2026-10-09T16:54:12.588Z",
+      "lastUsedAt": "2026-10-09T16:54:12.615Z"
+    },
+    {
+      "id": "skill_paint_drawing",
+      "taskTitle": "Open MS Paint and draw shapes",
+      "keywords": [
+        "paint",
+        "mspaint",
+        "draw",
+        "line",
+        "oval",
+        "shape",
+        "stickman"
+      ],
+      "apps": [
+        "Paint"
+      ],
+      "workflow": [
+        {
+          "step": 1,
+          "action_type": "hotkey",
+          "summary": "Press Win+R to open Run dialog",
+          "action_inputs": {
+            "key": "win r"
+          }
+        },
+        {
+          "step": 2,
+          "action_type": "type",
+          "summary": "Launch MS Paint directly",
+          "action_inputs": {
+            "content": "mspaint\\n"
+          }
+        },
+        {
+          "step": 3,
+          "action_type": "click",
+          "summary": "Click desired tool (Line, Oval, Brush) in top ribbon"
+        },
+        {
+          "step": 4,
+          "action_type": "drag",
+          "summary": "Execute hardware drag stroke across canvas coordinates"
+        }
+      ],
+      "pitfalls": [
+        "Always select the tool in top toolbar before dragging on canvas"
+      ],
+      "successCount": 6,
+      "failureCount": 0,
+      "createdAt": "2026-10-09T16:54:12.588Z",
+      "lastUsedAt": "2026-10-09T16:54:12.588Z"
+    },
+    {
+      "id": "skill_browser_search",
+      "taskTitle": "Open Browser and search or visit website",
+      "keywords": [
+        "browser",
+        "brave",
+        "chrome",
+        "search",
+        "website",
+        "open"
+      ],
+      "apps": [
+        "Browser"
+      ],
+      "workflow": [
+        {
+          "step": 1,
+          "action_type": "hotkey",
+          "summary": "Press Win+R to open Run dialog",
+          "action_inputs": {
+            "key": "win r"
+          }
+        },
+        {
+          "step": 2,
+          "action_type": "type",
+          "summary": "Launch browser (brave or chrome)",
+          "action_inputs": {
+            "content": "brave\\n"
+          }
+        },
+        {
+          "step": 3,
+          "action_type": "hotkey",
+          "summary": "Press Ctrl+L to focus address bar",
+          "action_inputs": {
+            "key": "ctrl l"
+          }
+        },
+        {
+          "step": 4,
+          "action_type": "type",
+          "summary": "Type URL or query followed by Enter"
+        }
+      ],
+      "pitfalls": [
+        "Use Ctrl+L to reliably select address bar without clicking on web page banners"
+      ],
+      "successCount": 12,
+      "failureCount": 0,
+      "createdAt": "2026-10-09T16:54:12.588Z",
+      "lastUsedAt": "2026-10-09T16:54:12.588Z"
+    },
+    {
+      "id": "skill_calc_math",
+      "taskTitle": "Open Calculator and calculate",
+      "keywords": [
+        "calc",
+        "calculator",
+        "math",
+        "calculate",
+        "numbers"
+      ],
+      "apps": [
+        "Calculator"
+      ],
+      "workflow": [
+        {
+          "step": 1,
+          "action_type": "hotkey",
+          "summary": "Press Win+R to open Run dialog",
+          "action_inputs": {
+            "key": "win r"
+          }
+        },
+        {
+          "step": 2,
+          "action_type": "type",
+          "summary": "Launch Calculator",
+          "action_inputs": {
+            "content": "calc\\n"
+          }
+        },
+        {
+          "step": 3,
+          "action_type": "type",
+          "summary": "Type mathematical numbers and operators directly"
+        }
+      ],
+      "pitfalls": [],
+      "successCount": 5,
+      "failureCount": 0,
+      "createdAt": "2026-10-09T16:54:12.588Z",
+      "lastUsedAt": "2026-10-09T16:54:12.588Z"
+    },
+    {
+      "id": "skill_1791564852622_mpldh",
+      "taskTitle": "search for cheap flights to goa on makemytrip",
+      "keywords": [
+        "search",
+        "cheap",
+        "flights",
+        "goa",
+        "makemytrip"
+      ],
+      "apps": [
+        "Browser"
+      ],
+      "workflow": [
+        {
+          "step": 1,
+          "action_type": "hotkey",
+          "thought": "I will launch the browser via Run dialog",
+          "summary": "Hotkey: win r",
+          "action_inputs": {
+            "key": "win r"
+          },
+          "verified": true
+        },
+        {
+          "step": 2,
+          "action_type": "type",
+          "thought": "Opening MakeMyTrip website",
+          "summary": "Type: \"brave makemytrip.com\\n\"",
+          "action_inputs": {
+            "content": "brave makemytrip.com\\n"
+          },
+          "verified": true
+        },
+        {
+          "step": 3,
+          "action_type": "click",
+          "thought": "Clicking flights tab",
+          "summary": "Click at \"[450, 220, 520, 250]\"",
+          "action_inputs": {
+            "start_box": "[450, 220, 520, 250]"
+          },
+          "verified": true
+        }
+      ],
+      "pitfalls": [],
+      "successCount": 1,
+      "failureCount": 0,
+      "createdAt": "2026-10-09T16:54:12.622Z",
+      "lastUsedAt": "2026-10-09T16:54:12.622Z"
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule_win_r_launch",
+      "category": "windows",
+      "rule": "To launch any app on Windows, always press Win+R and type its executable name (notepad, excel, mspaint, calc, brave, chrome) followed by enter.",
+      "confidence": 1
+    },
+    {
+      "id": "rule_save_file_ctrl_s",
+      "category": "windows",
+      "rule": "To save files in any Windows editor, press Ctrl+S, type the filename, and press Enter.",
+      "confidence": 0.98
+    },
+    {
+      "id": "rule_browser_address_bar",
+      "category": "app_specific",
+      "app": "Browser",
+      "rule": "In Chrome/Brave, use Ctrl+L to highlight address bar instantly.",
+      "confidence": 0.95
+    }
+  ],
+  "stats": {
+    "totalTasksExecuted": 1,
+    "totalTasksLearned": 6,
+    "totalGuidanceInjections": 3,
+    "totalPitfallsAvoided": 0
+  }
+}

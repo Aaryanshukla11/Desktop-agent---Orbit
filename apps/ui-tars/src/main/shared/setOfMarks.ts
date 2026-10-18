@@ -2,8 +2,8 @@
  
  */
 
-import { Conversation, PredictionParsed } from '@ui-tars/shared/types';
-import { parseBoxToScreenCoords } from '@ui-tars/sdk/core';
+import { Conversation, PredictionParsed } from '@UI-TARs/shared/types';
+import { parseBoxToScreenCoords } from '@UI-TARs/sdk/core';
 
 export interface Overlay {
   prediction: PredictionParsed;

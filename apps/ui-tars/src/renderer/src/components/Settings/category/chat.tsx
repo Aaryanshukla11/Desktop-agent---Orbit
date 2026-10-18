@@ -101,7 +101,7 @@ export function ChatSettings() {
                     Control the language used in LLM conversations
                   </FormDescription>
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger>
+                    <SelectTrigger className="orbit-glass-input rounded-xl">
                       <SelectValue placeholder="Select language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -127,6 +127,7 @@ export function ChatSettings() {
                   <FormControl>
                     <Input
                       type="number"
+                      className="orbit-glass-input"
                       {...field}
                       value={field.value === 0 ? '' : field.value}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -147,6 +148,7 @@ export function ChatSettings() {
                 <FormControl>
                   <Input
                     type="number"
+                    className="orbit-glass-input"
                     placeholder="Enter a number between 0-3000"
                     {...field}
                     value={field.value === 0 ? '' : field.value}

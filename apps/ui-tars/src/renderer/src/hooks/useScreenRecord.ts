@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { setOfMarksOverlays } from '@main/shared/setOfMarks';
 import { getState } from './useStore';
-import { Conversation } from '@ui-tars/shared/types';
+import { Conversation } from '@UI-TARs/shared/types';
 import { api } from '@renderer/api';
 
 export const useScreenRecord = (

@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+process.env.FORCE_RENDERER_ACCESSIBILITY = '1';
 
 export const mode = process.env.NODE_ENV;
 export const isProd = mode === 'production';

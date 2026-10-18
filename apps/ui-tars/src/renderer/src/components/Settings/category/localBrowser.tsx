@@ -84,7 +84,7 @@ export function LocalBrowserSettings() {
                 <FormLabel>Default Search Engine:</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="w-[124px]">
+                    <SelectTrigger className="w-[124px] orbit-glass-input rounded-xl">
                       <SelectValue placeholder="Select a search engine" />
                     </SelectTrigger>
                   </FormControl>

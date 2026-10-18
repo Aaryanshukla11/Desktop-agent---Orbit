@@ -152,6 +152,7 @@ export class UITarsModel extends Model {
     const isDirectOpenAI =
       !baseURL ||
       baseURL.includes('api.openai.com') ||
+      baseURL.includes('googleapis.com') ||
       Boolean(model?.toLowerCase().startsWith('gpt')) ||
       Boolean(model?.toLowerCase().startsWith('o1')) ||
       Boolean(model?.toLowerCase().startsWith('o3'));

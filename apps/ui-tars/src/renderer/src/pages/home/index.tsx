@@ -23,7 +23,7 @@ import {
 
 import computerUseImg from '@resources/home_img/computer_use.png?url';
 import browserUseImg from '@resources/home_img/browser_use.png?url';
-import { sleep } from '@ui-tars/shared/utils';
+import { sleep } from '@UI-TARs/shared/utils';
 
 import { FreeTrialDialog } from '../../components/AlertDialog/freeTrialDialog';
 import { DragArea } from '../../components/Common/drag';
@@ -154,53 +154,61 @@ const Home = () => {
     <div className="w-full h-full flex flex-col">
       <DragArea></DragArea>
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-semibold mt-1 mb-8">
+        <h1 className="text-2xl font-semibold mt-1 mb-8 text-slate-900 dark:text-white tracking-wide">
           Welcome to ORBIT Desktop
         </h1>
         <div className="flex gap-6">
-          <Card className="w-[400px] py-5">
-            <CardHeader className="px-5">
-              <CardTitle>Computer Operator</CardTitle>
-              <CardDescription>
+          <Card className="w-[420px] py-5 orbit-glass-interactive-card rounded-2xl border-black/10 dark:border-white/10 text-slate-800 dark:text-slate-100 shadow-2xl">
+            <CardHeader className="px-6">
+              <CardTitle className="text-xl font-medium text-slate-900 dark:text-white tracking-wide">
+                Computer Operator
+              </CardTitle>
+              <CardDescription className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                 Use the ORBIT model to automate and complete tasks directly on
                 your computer with AI assistance.
               </CardDescription>
             </CardHeader>
-            <CardContent className="px-5">
-              <img
-                src={computerUseImg}
-                alt=""
-                className="w-full h-full aspect-video object-fill rounded-lg"
-              />
+            <CardContent className="px-6">
+              <div className="overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/20 p-1">
+                <img
+                  src={computerUseImg}
+                  alt=""
+                  className="w-full h-full aspect-video object-cover rounded-lg opacity-90 hover:opacity-100 transition-opacity"
+                />
+              </div>
             </CardContent>
-            <CardFooter className="gap-3 px-5 flex justify-between">
+            <CardFooter className="gap-3 px-6 pt-2">
               <Button
                 onClick={() => handleLocalPress(Operator.LocalComputer)}
-                className="w-full"
+                className="w-full py-5 orbit-glass-button rounded-xl font-medium tracking-wide active:scale-[0.98]"
               >
                 Use Local Computer
               </Button>
             </CardFooter>
           </Card>
-          <Card className="w-[400px] py-5">
-            <CardHeader className="px-5">
-              <CardTitle>Browser Operator</CardTitle>
-              <CardDescription>
+          <Card className="w-[420px] py-5 orbit-glass-interactive-card rounded-2xl border-black/10 dark:border-white/10 text-slate-800 dark:text-slate-100 shadow-2xl">
+            <CardHeader className="px-6">
+              <CardTitle className="text-xl font-medium text-slate-900 dark:text-white tracking-wide">
+                Browser Operator
+              </CardTitle>
+              <CardDescription className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
                 Let the ORBIT model help you automate browser tasks, from
                 navigating pages to filling out forms.
               </CardDescription>
             </CardHeader>
-            <CardContent className="px-5">
-              <img
-                src={browserUseImg}
-                alt=""
-                className="w-full h-full aspect-video object-fill rounded-lg"
-              />
+            <CardContent className="px-6">
+              <div className="overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/20 p-1">
+                <img
+                  src={browserUseImg}
+                  alt=""
+                  className="w-full h-full aspect-video object-cover rounded-lg opacity-90 hover:opacity-100 transition-opacity"
+                />
+              </div>
             </CardContent>
-            <CardFooter className="gap-3 px-5 flex justify-between">
+            <CardFooter className="gap-3 px-6 pt-2">
               <Button
                 onClick={() => handleLocalPress(Operator.LocalBrowser)}
-                className="w-full"
+                className="w-full py-5 orbit-glass-button rounded-xl font-medium tracking-wide active:scale-[0.98]"
               >
                 Use Local Browser
               </Button>

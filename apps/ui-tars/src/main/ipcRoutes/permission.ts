@@ -1,7 +1,7 @@
 /*
  
  */
-import { initIpc } from '@ui-tars/electron-ipc/main';
+import { initIpc } from '@UI-TARs/electron-ipc/main';
 import * as env from '@main/env';
 import { store } from '@main/store/create';
 const t = initIpc.create();

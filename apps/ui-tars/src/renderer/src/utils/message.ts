@@ -1,7 +1,7 @@
 /*
  
  */
-import { Conversation } from '@ui-tars/shared/types';
+import { Conversation } from '@UI-TARs/shared/types';
 
 export const isCallUserMessage = (messages: Conversation[]) => {
   const lastMessage = messages?.[messages?.length - 1];

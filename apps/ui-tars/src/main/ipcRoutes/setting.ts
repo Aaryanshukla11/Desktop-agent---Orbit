@@ -2,7 +2,7 @@
  
  */
 import { OpenAI } from 'openai';
-import { initIpc } from '@ui-tars/electron-ipc/main';
+import { initIpc } from '@UI-TARs/electron-ipc/main';
 import { logger } from '../logger';
 
 const t = initIpc.create();

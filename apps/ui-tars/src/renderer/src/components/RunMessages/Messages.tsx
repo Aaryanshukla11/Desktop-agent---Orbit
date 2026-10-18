@@ -3,7 +3,7 @@
  */
 import { useState } from 'react';
 import { AlertCircle, Camera, ChevronDown, Loader2 } from 'lucide-react';
-import { ErrorStatusEnum } from '@ui-tars/shared/types';
+import { ErrorStatusEnum } from '@UI-TARs/shared/types';
 
 import { Button } from '@renderer/components/ui/button';
 import {
@@ -16,7 +16,9 @@ import { Markdown } from '../markdown';
 export const HumanTextMessage = ({ text }: { text: string }) => {
   return (
     <div className="flex gap-2 my-4 ml-4 items-center">
-      <div className="ml-auto p-3 rounded-md bg-secondary">{text}</div>
+      <div className="ml-auto px-4 py-2.5 rounded-2xl bg-slate-900 text-white dark:bg-white/15 dark:text-slate-100 border border-slate-800 dark:border-white/20 backdrop-blur-md shadow-md text-sm leading-relaxed max-w-[85%] break-words font-medium select-text">
+        {text}
+      </div>
     </div>
   );
 };
@@ -24,7 +26,7 @@ export const HumanTextMessage = ({ text }: { text: string }) => {
 export const AssistantTextMessage = ({ text }: { text: string }) => {
   return (
     <div className="flex gap-2 mb-4 items-center">
-      <div className="mr-auto px-3 pt-3 pb-1 rounded-md bg-sky-100">
+      <div className="mr-auto px-4 py-3 rounded-2xl bg-black/[0.04] text-slate-900 dark:bg-white/5 dark:text-slate-200 border border-black/10 dark:border-white/10 backdrop-blur-md shadow-sm text-sm leading-relaxed max-w-[85%] break-words select-text">
         <Markdown>{text.replace(/\\n/g, '\n')}</Markdown>
       </div>
     </div>
@@ -40,10 +42,10 @@ export const ScreenshotMessage = ({ onClick }: ScreenshotMessageProps) => {
     <Button
       variant="outline"
       size="sm"
-      className="rounded-full"
+      className="orbit-glass-button rounded-full text-xs px-3 py-1 gap-1.5 text-slate-800 dark:text-slate-200 font-medium border-slate-300 dark:border-white/15 shadow-sm"
       onClick={onClick}
     >
-      <Camera className="w-4 h-4" />
+      <Camera className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300" />
       <span>Screenshot</span>
     </Button>
   );

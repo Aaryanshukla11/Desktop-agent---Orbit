@@ -22,12 +22,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog';
-import { ComputerUseUserData, StatusEnum } from '@ui-tars/shared/types';
+import { ComputerUseUserData, StatusEnum } from '@UI-TARs/shared/types';
 import { reportHTMLContent } from '@renderer/utils/html';
 import { uploadReport } from '@renderer/utils/share';
 import { useStore } from '@renderer/hooks/useStore';
 import { useSetting } from '@renderer/hooks/useSetting';
-import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
+import { IMAGE_PLACEHOLDER } from '@UI-TARs/shared/constants';
 // import { useScreenRecord } from '@renderer/hooks/useScreenRecord';
 import { useSession } from '@renderer/hooks/useSession';
 import dayjs from 'dayjs';

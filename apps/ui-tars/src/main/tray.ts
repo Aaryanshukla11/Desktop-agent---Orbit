@@ -4,7 +4,7 @@
 import { Menu, Tray, app, nativeImage } from 'electron';
 import path from 'path';
 
-import { StatusEnum } from '@ui-tars/shared/types';
+import { StatusEnum } from '@UI-TARs/shared/types';
 
 import { exportLogs } from '@main/logger';
 import { showWindow } from '@main/window';

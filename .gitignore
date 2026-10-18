@@ -13,3 +13,16 @@ scripts/merge-yml/*.yml
 .claude/
 .tarko
 .mcp*_token
+scratch/
+apps/ui-tars/runs/
+runs/**
+!runs/orbit_experience/
+!runs/orbit_experience/**
+!runs/training_dataset.jsonl
+*.tsbuildinfo
+temp_excel_slice_test/
+*.xlsx
+test_batch.json
+tools/excel-mcp/*.exe
+tools/excel-mcp/*.zip
+

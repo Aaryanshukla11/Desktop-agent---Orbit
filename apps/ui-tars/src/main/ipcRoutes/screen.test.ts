@@ -1,6 +1,4 @@
-/*
- 
- */
+
 import { screenRoute } from './screen';
 import { getScreenSize } from '@main/utils/screen';
 import { describe, expect, it, vi, beforeEach } from 'vitest';

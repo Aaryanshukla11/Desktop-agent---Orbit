@@ -28,6 +28,9 @@ export function createMainWindow() {
     routerPath: '/',
     width: 1200,
     height: 700,
+    resizable: true,
+    maximizable: true,
+    minimizable: true,
     alwaysOnTop: false,
   });
 

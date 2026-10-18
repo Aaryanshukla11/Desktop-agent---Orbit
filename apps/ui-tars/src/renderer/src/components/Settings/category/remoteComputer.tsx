@@ -151,7 +151,7 @@ export function RemoteComputerSettings({
                 <FormLabel>Sandbox Manager URL</FormLabel>
                 <FormControl>
                   <Input
-                    className="bg-white"
+                    className="orbit-glass-input"
                     placeholder="Enter Sandbox Manager URL"
                     {...field}
                   />
@@ -168,7 +168,7 @@ export function RemoteComputerSettings({
                 <FormLabel>User Token</FormLabel>
                 <FormControl>
                   <Input
-                    className="bg-white"
+                    className="orbit-glass-input"
                     placeholder="Enter User Token"
                     {...field}
                   />
@@ -185,7 +185,7 @@ export function RemoteComputerSettings({
                 <FormLabel>VNC Proxy Server</FormLabel>
                 <FormControl>
                   <Input
-                    className="bg-white"
+                    className="orbit-glass-input"
                     placeholder="Enter VNC Proxy Server"
                     {...field}
                   />
@@ -201,7 +201,7 @@ export function RemoteComputerSettings({
                 <FormLabel>Establish IP</FormLabel>
                 <FormControl>
                   <Input
-                    className="bg-white"
+                    className="orbit-glass-input"
                     placeholder="Enter Establish IP"
                     {...field}
                   />

@@ -276,7 +276,11 @@ export function VLMSettings({
       <Form {...form}>
         <form className={cn('space-y-8 px-[1px]', className)}>
           {!isRemoteAutoUpdatedPreset && (
-            <Button type="button" variant="outline" onClick={handlePresetModal}>
+            <Button
+              type="button"
+              className="orbit-glass-button rounded-xl"
+              onClick={handlePresetModal}
+            >
               Import Preset Config
             </Button>
           )}
@@ -311,7 +315,7 @@ export function VLMSettings({
                     }}
                     value={field.value}
                   >
-                    <SelectTrigger className="w-full bg-white">
+                    <SelectTrigger className="w-full orbit-glass-input rounded-xl">
                       <SelectValue placeholder="Select VLM provider" />
                     </SelectTrigger>
                     <SelectContent>
@@ -336,7 +340,7 @@ export function VLMSettings({
                 <FormLabel>VLM Base URL</FormLabel>
                 <FormControl>
                   <Input
-                    className="bg-white"
+                    className="orbit-glass-input"
                     placeholder="Enter VLM Base URL (e.g. https://api.openai.com/v1)"
                     {...field}
                     disabled={isRemoteAutoUpdatedPreset}
@@ -357,7 +361,7 @@ export function VLMSettings({
                   <div className="relative">
                     <Input
                       type={showPassword ? 'text' : 'password'}
-                      className="bg-white"
+                      className="orbit-glass-input pr-10"
                       placeholder="Enter API Key (e.g. sk-...)"
                       {...field}
                       disabled={isRemoteAutoUpdatedPreset}
@@ -366,14 +370,14 @@ export function VLMSettings({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute right-0 top-0 h-full px-3 py-2 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
                       disabled={isRemoteAutoUpdatedPreset}
                     >
                       {showPassword ? (
-                        <Eye className="h-4 w-4 text-gray-500" />
+                        <Eye className="h-4 w-4" />
                       ) : (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
+                        <EyeOff className="h-4 w-4" />
                       )}
                     </Button>
                   </div>
@@ -390,7 +394,7 @@ export function VLMSettings({
                 <FormLabel>VLM Model Name</FormLabel>
                 <FormControl>
                   <Input
-                    className="bg-white"
+                    className="orbit-glass-input"
                     placeholder="Enter VLM Model Name (e.g. gpt-4o)"
                     {...field}
                     disabled={isRemoteAutoUpdatedPreset}
@@ -585,16 +589,15 @@ export function ModelAvailabilityCheck({
     <div className={`space-y-4 ${className || ''}`}>
       <Button
         type="button"
-        variant="outline"
         onClick={handleCheckModel}
         disabled={
           disabled || checkState.status === 'checking' || !isConfigValid
         }
-        className="w-50"
+        className="w-56 orbit-glass-button rounded-xl font-medium text-slate-900 dark:text-slate-100 disabled:opacity-40"
       >
         {checkState.status === 'checking' ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin text-slate-300" />
             Checking Model...
           </>
         ) : (
@@ -603,18 +606,18 @@ export function ModelAvailabilityCheck({
       </Button>
 
       {checkState.status === 'success' && (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 !text-green-600" />
-          <AlertDescription className="text-green-800">
+        <Alert className="border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 rounded-xl">
+          <CheckCircle className="h-4 w-4 !text-emerald-600 dark:!text-emerald-400" />
+          <AlertDescription className="text-emerald-700 dark:text-emerald-200 text-xs">
             {checkState.message}
           </AlertDescription>
         </Alert>
       )}
 
       {checkState.status === 'error' && (
-        <Alert className="border-red-200 bg-red-50">
-          <XCircle className="h-4 w-4 !text-red-600" />
-          <AlertDescription className="text-red-800">
+        <Alert className="border-red-500/30 bg-red-500/10 text-red-800 dark:text-red-300 rounded-xl">
+          <XCircle className="h-4 w-4 !text-red-600 dark:!text-red-400" />
+          <AlertDescription className="text-red-700 dark:text-red-200 text-xs">
             {checkState.message}
           </AlertDescription>
         </Alert>

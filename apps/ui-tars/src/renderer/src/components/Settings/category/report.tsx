@@ -90,6 +90,7 @@ export function ReportSettings() {
                 <FormLabel>Report Storage Base URL</FormLabel>
                 <FormControl>
                   <Input
+                    className="orbit-glass-input"
                     placeholder="https://your-report-storage-endpoint.com/upload"
                     {...field}
                   />
@@ -107,6 +108,7 @@ export function ReportSettings() {
                 <FormLabel>UTIO Base URL</FormLabel>
                 <FormControl>
                   <Input
+                    className="orbit-glass-input"
                     placeholder="https://your-utio-endpoint.com/collect"
                     {...field}
                   />

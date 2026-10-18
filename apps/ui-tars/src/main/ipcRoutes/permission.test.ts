@@ -1,6 +1,3 @@
-/*
- 
- */
 import { permissionRoute } from './permission';
 import { store } from '@main/store/create';
 import { describe, expect, it, vi, beforeEach } from 'vitest';

@@ -1,6 +1,7 @@
-import { MessageCirclePlus } from 'lucide-react';
+import { MessageCirclePlus, ScrollText } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { TaskLogDialog } from '@renderer/components/TaskLogDialog';
 
 import { Card } from '@renderer/components/ui/card';
 import {
@@ -17,7 +18,7 @@ import { ScrollArea } from '@renderer/components/ui/scroll-area';
 import { useStore } from '@renderer/hooks/useStore';
 import { useSession } from '@renderer/hooks/useSession';
 import Prompts from '../../components/Prompts';
-import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
+import { IMAGE_PLACEHOLDER } from '@UI-TARs/shared/constants';
 import {
   AssistantTextMessage,
   ErrorMessage,
@@ -28,7 +29,7 @@ import {
 import ThoughtChain from '../../components/ThoughtChain';
 import { api } from '../../api';
 import ImageGallery from '../../components/ImageGallery';
-import { PredictionParsed, StatusEnum } from '@ui-tars/shared/types';
+import { PredictionParsed, StatusEnum } from '@UI-TARs/shared/types';
 import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
 import { NavDialog } from '../../components/AlertDialog/navDialog';
@@ -36,7 +37,7 @@ import {
   checkVLMSettings,
   LocalSettingsDialog,
 } from '../../components/Settings/local';
-import { sleep } from '@ui-tars/shared/utils';
+import { sleep } from '@UI-TARs/shared/utils';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -68,6 +69,7 @@ const LocalOperator = () => {
   );
   const [isNavDialogOpen, setNavDialogOpen] = useState(false);
   const [localOpen, setLocalOpen] = useState(false);
+  const [logDialogOpen, setLogDialogOpen] = useState(false);
 
   useEffect(() => {
     const update = async () => {
@@ -268,6 +270,25 @@ const LocalOperator = () => {
     );
   };
 
+  // Extract latest finished content or logs
+  const latestFinishedMsg = chatMessages
+    ?.slice()
+    .reverse()
+    .find((m) => {
+      const finished = getFinishedContent(m.predictionParsed);
+      return !!finished || (m.from === 'gpt' && typeof m.value === 'string' && m.value.length > 30);
+    });
+
+  const latestLogContent =
+    (latestFinishedMsg as any)?.logContent ||
+    getFinishedContent(latestFinishedMsg?.predictionParsed) ||
+    (latestFinishedMsg?.value as string) ||
+    '';
+
+  const allThoughtSteps = chatMessages
+    ?.flatMap((m) => m.predictionParsed || [])
+    .filter((step) => step.action_type === 'thought');
+
   return (
     <div className="flex flex-col w-full h-full">
       <NavHeader
@@ -275,16 +296,32 @@ const LocalOperator = () => {
         onBack={handleBack}
       ></NavHeader>
       <div className="px-5 pb-5 flex flex-1 gap-5">
-        <Card className="flex-1 basis-2/5 px-0 py-4 gap-4 h-[calc(100vh-76px)]">
+        <Card className="flex-1 basis-2/5 px-0 py-4 gap-4 h-[calc(100vh-76px)] orbit-glass-card rounded-2xl border-black/10 dark:border-white/10 text-slate-800 dark:text-slate-100 shadow-xl overflow-hidden">
           <div className="flex items-center justify-between w-full px-4">
             <SidebarTrigger
               variant="secondary"
-              className="size-8"
+              className="size-8 orbit-glass-button rounded-lg text-slate-600 dark:text-slate-300"
             ></SidebarTrigger>
-            <Button variant="outline" size="sm" onClick={handleNewChat}>
-              <MessageCirclePlus />
-              New Chat
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="orbit-glass-button rounded-xl text-xs gap-1.5 border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/10"
+                onClick={() => setLogDialogOpen(true)}
+              >
+                <ScrollText className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+                Log
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="orbit-glass-button rounded-xl text-xs gap-1.5 border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/10"
+                onClick={handleNewChat}
+              >
+                <MessageCirclePlus className="w-3.5 h-3.5" />
+                New Chat
+              </Button>
+            </div>
           </div>
           {renderChatList()}
           <ChatInput
@@ -294,12 +331,17 @@ const LocalOperator = () => {
             checkBeforeRun={checkVLM}
           />
         </Card>
-        <Card className="flex-1 basis-3/5 p-3 h-[calc(100vh-76px)]">
-          <Tabs defaultValue="screenshot" className="flex-1">
-            <TabsList>
-              <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
+        <Card className="flex-1 basis-3/5 p-4 h-[calc(100vh-76px)] orbit-glass-card rounded-2xl border-black/10 dark:border-white/10 text-slate-800 dark:text-slate-100 shadow-xl overflow-hidden">
+          <Tabs defaultValue="screenshot" className="flex-1 flex flex-col h-full">
+            <TabsList className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl self-start p-1">
+              <TabsTrigger
+                value="screenshot"
+                className="rounded-lg data-[state=active]:bg-black/10 dark:data-[state=active]:bg-white/15 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white text-slate-600 dark:text-slate-300 text-xs px-3"
+              >
+                ScreenShot
+              </TabsTrigger>
             </TabsList>
-            <TabsContent value="screenshot">
+            <TabsContent value="screenshot" className="flex-1 overflow-hidden mt-3">
               <ImageGallery
                 messages={chatMessages}
                 selectImgIndex={selectImg}
@@ -317,6 +359,12 @@ const LocalOperator = () => {
         isOpen={localOpen}
         onSubmit={handleLocalSettingsSubmit}
         onClose={handleLocalSettingsClose}
+      />
+      <TaskLogDialog
+        open={logDialogOpen}
+        onOpenChange={setLogDialogOpen}
+        rawLogContent={latestLogContent}
+        thoughtSteps={allThoughtSteps}
       />
     </div>
   );

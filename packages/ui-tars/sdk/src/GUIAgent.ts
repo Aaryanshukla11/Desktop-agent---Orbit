@@ -118,8 +118,11 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     let previousResponseId: string | undefined;
     let lastActionSig = '';
     let consecutiveRepeatCount = 0;
+    let consecutiveClickCount = 0;
     let recentActionHistory: string[] = [];
     let steeringHint = '';
+    let lastScreenshotBase64: string | null = null;
+    let visualStagnationCount = 0;
 
     // start running agent
     data.status = StatusEnum.RUNNING;
@@ -214,6 +217,22 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         let end = Date.now();
 
         if (isValidImage) {
+          if (lastScreenshotBase64) {
+            const lenDiff = Math.abs(snapshot.base64.length - lastScreenshotBase64.length);
+            const isVirtuallyIdentical =
+              snapshot.base64 === lastScreenshotBase64 ||
+              (lenDiff < 500 && snapshot.base64.slice(1000, 5000) === lastScreenshotBase64.slice(1000, 5000));
+            if (isVirtuallyIdentical) {
+              visualStagnationCount++;
+              logger.warn(
+                `[GUIAgent] CLOSED-LOOP: Visual stagnation detected (${visualStagnationCount}x consecutive identical screen state)`,
+              );
+            } else {
+              visualStagnationCount = 0;
+            }
+          }
+          lastScreenshotBase64 = snapshot.base64;
+
           data.conversations.push({
             from: 'human',
             value: IMAGE_PLACEHOLDER,
@@ -243,6 +262,10 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         let effectiveSystemPrompt = data.systemPrompt;
         if (steeringHint) {
           effectiveSystemPrompt += `\n\n${steeringHint}`;
+          const lastHuman = [...data.conversations].reverse().find((c) => c.from === 'human');
+          if (lastHuman && !lastHuman.value.includes('[ALERT]') && !lastHuman.value.includes('[CLOSED-LOOP') && !lastHuman.value.includes('[CRITICAL')) {
+            lastHuman.value = `${lastHuman.value}\n\n${steeringHint}`;
+          }
         }
 
         // conversations -> messages, images
@@ -364,9 +387,36 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
 
         // start execute action
         for (const parsedPrediction of parsedPredictions) {
-          const actionType = parsedPrediction.action_type;
+          const actionType = (parsedPrediction.action_type || '').trim();
 
           logger.info('[GUIAgent] Action:', actionType);
+
+          if (!actionType) {
+            const thoughtText = parsedPrediction.thought || '';
+            logger.warn('[GUIAgent] Received empty action from model prediction. Thought:', thoughtText);
+            if (
+              /\b(?:task\s+(?:is\s+)?complete|completed\s+the\s+task|finished|done|all\s+(?:rows|data|steps)\s+(?:are|have\s+been)\s+(?:added|created|saved))\b/i.test(
+                thoughtText,
+              )
+            ) {
+              logger.info('[GUIAgent] Empty action with completion thought detected, finalizing task.');
+              data.status = StatusEnum.END;
+              break;
+            }
+            steeringHint = `[SYSTEM NOTICE]: Your previous turn contained thoughts but NO executable action. You MUST end your response with a valid Action:
+Action: click(start_box='[x1, y1, x2, y2]')
+Action: type(content='...')
+Action: hotkey(key='...')
+Action: finished()`;
+            continue;
+          }
+
+          const isClickAction = ['click', 'left_double', 'right_single'].includes(actionType);
+          if (isClickAction) {
+            consecutiveClickCount++;
+          } else {
+            consecutiveClickCount = 0;
+          }
 
           // Action repetition & loop detector
           const currentSig = `${actionType}::${JSON.stringify(parsedPrediction.action_inputs || {})}`;
@@ -381,26 +431,64 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           } else {
             lastActionSig = currentSig;
             consecutiveRepeatCount = 1;
-            if (historyMatches < 3) {
+            if (historyMatches < 3 && consecutiveClickCount < 3) {
               steeringHint = '';
             }
           }
 
-          if (consecutiveRepeatCount >= 3 || historyMatches >= 3) {
-            logger.warn(
-              `[GUIAgent] Repeated action or oscillation loop detected (${consecutiveRepeatCount}x / ${historyMatches}x in history): ${currentSig}`,
-            );
-            steeringHint = `[SYSTEM STEERING ALERT]: You are repeatedly executing action "${actionType}" with no progress! Look at the current screenshot carefully: in Excel, if an overwrite or upload failed banner/dialog appears, click Overwrite or press hotkey(key='enter'). If the ribbon is collapsed or chart buttons are not visible, press hotkey(key='alt f1') to insert the 2D Column Chart directly, or press hotkey(key='ctrl f1') to expand the ribbon. Do NOT click blank cells!`;
+          if (visualStagnationCount >= 2) {
+            steeringHint = `[CLOSED-LOOP VERIFICATION ALERT]: Screen did NOT change after the previous action! The previous action had ZERO effect. The window or input control is NOT focused, or the coordinates missed.
+1. If navigating to a URL or searching: use hotkey(key='ctrl l') to focus the address bar, then type the URL.
+2. If clicking an element that didn't respond: do NOT repeat the same click! Use keyboard shortcuts or click inside the window content.
+3. If an app window is unmaximized, maximize it immediately with hotkey(key='win up').`;
           }
 
-          if (consecutiveRepeatCount >= 5 || historyMatches >= 5) {
-            logger.warn('[GUIAgent] Action repeated excessively.');
-            if (actionType !== 'type') {
-              try {
+          if (
+            visualStagnationCount >= 3 ||
+            (consecutiveClickCount >= 4 && visualStagnationCount >= 1) ||
+            consecutiveRepeatCount >= 4 ||
+            historyMatches >= 4
+          ) {
+            logger.warn(
+              `[GUIAgent] CLOSED-LOOP CIRCUIT BREAKER: Stagnant screen or loop detected (${visualStagnationCount}x stagnant / ${consecutiveRepeatCount}x repeat / ${historyMatches}x history matches). Executing active rescue.`,
+            );
+            try {
+              const thoughtText = parsedPrediction.thought || '';
+              const wasNavIntent =
+                (actionType === 'type' &&
+                  /\b(?:https?:|\.com|\.org|\.net|canva\.com)\b/i.test(
+                    JSON.stringify(parsedPrediction.action_inputs || {}),
+                  )) ||
+                /\b(?:address\s*bar|url\s*bar|omnibox|browser\s*address)\b/i.test(thoughtText);
+              const wasModalOrMenuIntent =
+                /\b(?:share|menu|drawer|download|export|modal|dialog|popup|overlay|see all|crop)\b/i.test(thoughtText);
+
+              const typeIntentMatch = thoughtText.match(/\b(?:type|search\s+for|enter|input)\s+["']([^"']{1,50}?)["']/i);
+              const isMessagesIntent = /\b(?:messages?|chat|direct|dm|inbox)\b/i.test(thoughtText);
+
+              if (typeIntentMatch && typeIntentMatch[1]) {
+                const targetWord = typeIntentMatch[1].split('/')[0].trim();
+                logger.info(
+                  `[GUIAgent] Circuit breaker: Thought-Action desynchronization detected for "${targetWord}", steering model to type()`,
+                );
+                steeringHint = `[CRITICAL RECOVERY]: You are in a repetitive click loop! Your thought stated you want to type/search "${targetWord}".
+You MUST NOT output click() again! You MUST output Action: type(content='${targetWord}\\n') immediately!`;
+              } else if (isMessagesIntent) {
+                logger.info('[GUIAgent] Circuit breaker: repetitive click on Messages detected, steering to direct navigation');
+                steeringHint = `[CRITICAL RECOVERY]: You are in a repetitive click loop trying to open Messages!
+Do NOT click the bottom corner. In web apps like Instagram, navigate directly:
+Action: hotkey(key='ctrl l')
+followed by:
+Action: type(content='instagram.com/direct/\\n')
+Or click the left sidebar Messenger icon at [25, 410, 25, 410]!`;
+              } else if (wasModalOrMenuIntent || isClickAction) {
+                logger.info(
+                  '[GUIAgent] Circuit breaker: dismissing blocking menu/drawer/modal/crop via Esc',
+                );
                 await operator.execute({
                   prediction: '',
                   parsedPrediction: {
-                    thought: 'Loop detected, emergency escape',
+                    thought: 'Circuit breaker: dismissing blocking modal via Esc',
                     reflection: null,
                     action_type: 'hotkey',
                     action_inputs: { key: 'esc' },
@@ -410,8 +498,59 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                   scaleFactor: snapshot.scaleFactor,
                   factors: this.model.factors,
                 });
-              } catch (e) {}
-            }
+                steeringHint = `[CLOSED-LOOP RESCUE]: Actions were stagnant or looping. An Esc key was sent to reset focus.
+1. Do NOT repeat the same click! If clicking failed, change coordinates or use keyboard shortcuts.
+2. If your task is completed, call finished().`;
+              } else if (wasNavIntent) {
+                logger.info(
+                  '[GUIAgent] Circuit breaker: forcing address bar focus via Ctrl+L',
+                );
+                await operator.execute({
+                  prediction: '',
+                  parsedPrediction: {
+                    thought: 'Circuit breaker: focusing address bar',
+                    reflection: null,
+                    action_type: 'hotkey',
+                    action_inputs: { key: 'ctrl l' },
+                  },
+                  screenWidth: width,
+                  screenHeight: height,
+                  scaleFactor: snapshot.scaleFactor,
+                  factors: this.model.factors,
+                });
+              } else {
+                logger.info(
+                  '[GUIAgent] Circuit breaker: maximizing active window',
+                );
+                await operator.execute({
+                  prediction: '',
+                  parsedPrediction: {
+                    thought: 'Circuit breaker: maximizing active window',
+                    reflection: null,
+                    action_type: 'hotkey',
+                    action_inputs: { key: 'win up' },
+                  },
+                  screenWidth: width,
+                  screenHeight: height,
+                  scaleFactor: snapshot.scaleFactor,
+                  factors: this.model.factors,
+                });
+              }
+
+              // Prune duplicate consecutive assistant responses from conversation history to break autoregressive token repetition
+              const cleanedConversations = [];
+              let prevValue = '';
+              for (const c of data.conversations) {
+                if (c.from === 'gpt' && c.value === prevValue) {
+                  continue; // Skip duplicate repetitive assistant turn
+                }
+                prevValue = c.value;
+                cleanedConversations.push(c);
+              }
+              data.conversations = cleanedConversations;
+            } catch (e) {}
+            visualStagnationCount = 0;
+            consecutiveClickCount = 0;
             consecutiveRepeatCount = 0;
             lastActionSig = '';
             recentActionHistory = [];

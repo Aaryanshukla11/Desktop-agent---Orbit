@@ -12,6 +12,7 @@ import {
   session,
   WebContentsView,
   screen,
+  nativeTheme,
 } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
 import ElectronStore from 'electron-store';
@@ -19,7 +20,7 @@ import ElectronStore from 'electron-store';
 import * as env from '@main/env';
 import { logger } from '@main/logger';
 import { createMainWindow } from '@main/window/index';
-import { registerIpcMain } from '@ui-tars/electron-ipc/main';
+import { registerIpcMain } from '@UI-TARs/electron-ipc/main';
 import { ipcRoutes } from './ipcRoutes';
 
 import { UTIOService } from './services/utio';
@@ -39,6 +40,7 @@ import { isTrustedRendererFrame } from './utils/security';
 
 const { isProd } = env;
 app.name = 'Orbit Beta';
+nativeTheme.themeSource = 'system';
 
 // 在应用初始化之前启用辅助功能支持
 app.commandLine.appendSwitch('force-renderer-accessibility');
@@ -59,23 +61,19 @@ if (isProd) {
 }
 
 const loadDevDebugTools = async () => {
-  import('electron-debug').then(({ default: electronDebug }) => {
+  if (!env.isDev) return;
+  try {
+    const { default: electronDebug } = await import('electron-debug');
     electronDebug({ showDevTools: false });
-  });
+  } catch {}
 
-  import('electron-devtools-installer')
-    .then(({ default: installExtensionDefault, REACT_DEVELOPER_TOOLS }) => {
-      // @ts-ignore
-      const installExtension = installExtensionDefault?.default;
-      const extensions = [installExtension(REACT_DEVELOPER_TOOLS)];
-
-      return Promise.all(extensions)
-        .then((names) => logger.info('Added Extensions:', names.join(', ')))
-        .catch((err) =>
-          logger.error('An error occurred adding extension:', err),
-        );
-    })
-    .catch(logger.error);
+  try {
+    const installer = await import('electron-devtools-installer');
+    const installExtension = installer.default || (installer as any).installExtension;
+    if (typeof installExtension === 'function') {
+      await installExtension(installer.REACT_DEVELOPER_TOOLS).catch(() => {});
+    }
+  } catch {}
 };
 
 const initializeApp = async () => {
@@ -178,7 +176,13 @@ const initializeApp = async () => {
 const registerIPCHandlers = (
   wrappers: (BrowserWindow | WebContentsView | BrowserView)[],
 ) => {
-  ipcMain.handle('getState', () => {
+  ipcMain.handle('getState', (event) => {
+    if (!isTrustedRendererFrame(event.senderFrame)) {
+      logger.warn(
+        `[main] Rejected unauthorized getState call from frame: ${event.senderFrame?.url}`,
+      );
+      throw new Error('Unauthorized IPC sender');
+    }
     const state = store.getState();
     return sanitizeState(state);
   });
@@ -203,7 +207,13 @@ const registerIPCHandlers = (
   });
 
   // TODO: move to ipc routes
-  ipcMain.handle('utio:shareReport', async (_, params) => {
+  ipcMain.handle('utio:shareReport', async (event, params) => {
+    if (!isTrustedRendererFrame(event.senderFrame)) {
+      logger.warn(
+        `[main] Rejected unauthorized utio:shareReport call from frame: ${event.senderFrame?.url}`,
+      );
+      throw new Error('Unauthorized IPC sender');
+    }
     await UTIOService.getInstance().shareReport(params);
   });
 

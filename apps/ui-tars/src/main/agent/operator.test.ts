@@ -21,6 +21,8 @@ vi.mock('electron', () => ({
 
 vi.mock('@main/env', () => ({
   isMacOS: false,
+  isWindows: false,
+  isLinux: false,
 }));
 
 describe('NutJSElectronOperator', () => {
@@ -45,6 +47,8 @@ describe('NutJSElectronOperator', () => {
       const mockSource = {
         display_id: '1',
         thumbnail: {
+          isEmpty: () => false,
+          toJPEG: () => Buffer.from('mock-image'),
           toPNG: () => Buffer.from('mock-image'),
           resize: () => ({
             toPNG: () => Buffer.from('mock-image'),

@@ -14,7 +14,7 @@ import {
   TIME_URL,
   FREE_MODEL_BASE_URL,
 } from './shared';
-import { UITarsModelVersion } from '@ui-tars/shared/constants';
+import { UITarsModelVersion } from '@UI-TARs/shared/constants';
 
 const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
 

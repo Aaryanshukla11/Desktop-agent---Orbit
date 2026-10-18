@@ -94,6 +94,7 @@ export class SettingStore {
     autoUpdate = false,
   ): Promise<void> {
     try {
+      assertSafePresetUrl(url);
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch preset: ${response.status}`);
@@ -134,6 +135,7 @@ export class SettingStore {
 
   public static async fetchPresetFromUrl(url: string): Promise<LocalStore> {
     try {
+      assertSafePresetUrl(url);
       const response = await fetch(url);
       const yamlContent = await response.text();
       return await this.importPresetFromText(yamlContent);
@@ -148,4 +150,22 @@ async function parsePresetYaml(yamlContent: string): Promise<LocalStore> {
   const preset = yaml.load(yamlContent);
   const validatedPreset = validatePreset(preset);
   return validatedPreset;
+}
+
+function assertSafePresetUrl(urlString: string): URL {
+  const parsed = new URL(urlString);
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error(
+      'Only HTTP and HTTPS protocols are permitted for preset URLs',
+    );
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (
+    host === '169.254.169.254' ||
+    host === 'metadata.google.internal' ||
+    host.startsWith('169.254.')
+  ) {
+    throw new Error('Access to cloud metadata endpoints is blocked');
+  }
+  return parsed;
 }

@@ -1,7 +1,7 @@
 /**
  
  */
-import { ComputerUseUserData } from '@ui-tars/shared/types';
+import { ComputerUseUserData } from '@UI-TARs/shared/types';
 
 function replaceStringWithFirstAppearance(
   str: string,

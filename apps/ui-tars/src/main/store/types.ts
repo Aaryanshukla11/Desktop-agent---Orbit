@@ -1,7 +1,7 @@
 /**
  
  */
-import { GUIAgentData, Message } from '@ui-tars/shared/types';
+import { GUIAgentData, Message } from '@UI-TARs/shared/types';
 
 import { LocalStore, PresetSource } from './validate';
 import { ConversationWithSoM } from '@main/shared/types';

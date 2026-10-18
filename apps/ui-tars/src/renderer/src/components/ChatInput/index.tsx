@@ -3,8 +3,8 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
-import { StatusEnum } from '@ui-tars/shared/types';
+import { IMAGE_PLACEHOLDER } from '@UI-TARs/shared/constants';
+import { StatusEnum } from '@UI-TARs/shared/types';
 
 import { useRunAgent } from '@renderer/hooks/useRunAgent';
 import { useStore } from '@renderer/hooks/useStore';

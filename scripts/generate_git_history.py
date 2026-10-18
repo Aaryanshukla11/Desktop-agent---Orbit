@@ -66,7 +66,7 @@ DAILY_SCHEDULE = [
     ],
     # Day 5: July 6
     [
-        ("feat(shared): scaffold @ui-tars/shared package manifest and build config", ["packages/ui-tars/shared/package.json", "packages/ui-tars/shared/rslib.config.ts"]),
+        ("feat(shared): scaffold @UI-TARs/shared package manifest and build config", ["packages/ui-tars/shared/package.json", "packages/ui-tars/shared/rslib.config.ts"]),
         ("feat(shared): add typescript configuration for shared package", ["packages/ui-tars/shared/tsconfig.json"]),
         ("feat(shared): define Core Agent Message interfaces and types", ["packages/ui-tars/shared/src/types/agent.ts"]),
         ("feat(shared): implement StatusEnum lifecycle transitions", ["packages/ui-tars/shared/src/types"]),
@@ -103,7 +103,7 @@ DAILY_SCHEDULE = [
     ],
     # Day 10: July 11 (Weekend)
     [
-        ("docs(shared): add API reference documentation for @ui-tars/shared", ["packages/ui-tars/shared/README.md"]),
+        ("docs(shared): add API reference documentation for @UI-TARs/shared", ["packages/ui-tars/shared/README.md"]),
         ("chore(shared): add package changelog template", ["packages/ui-tars/shared/CHANGELOG.md"]),
         ("chore(deps): update workspace lockfile dependencies", ["pnpm-lock.yaml"]),
         ("refactor(shared): optimize memory footprint of error objects", ["packages/ui-tars/shared/src/types"]),
@@ -117,7 +117,7 @@ DAILY_SCHEDULE = [
     ],
     # Day 12: July 13
     [
-        ("feat(sdk): initialize @ui-tars/sdk package architecture", ["packages/ui-tars/sdk/package.json", "packages/ui-tars/sdk/rslib.config.ts"]),
+        ("feat(sdk): initialize @UI-TARs/sdk package architecture", ["packages/ui-tars/sdk/package.json", "packages/ui-tars/sdk/rslib.config.ts"]),
         ("feat(sdk): setup typescript project configuration for SDK", ["packages/ui-tars/sdk/tsconfig.json"]),
         ("feat(sdk): define BaseGUIAgent abstract class and lifecycle hooks", ["packages/ui-tars/sdk/src/base/index.ts"]),
         ("feat(sdk): define Operator contract interface for hardware drivers", ["packages/ui-tars/sdk/src/types.ts"]),
@@ -168,7 +168,7 @@ DAILY_SCHEDULE = [
     ],
     # Day 19: July 20
     [
-        ("feat(action-parser): scaffold @ui-tars/action-parser package", ["packages/ui-tars/action-parser/package.json", "packages/ui-tars/action-parser/rslib.config.ts"]),
+        ("feat(action-parser): scaffold @UI-TARs/action-parser package", ["packages/ui-tars/action-parser/package.json", "packages/ui-tars/action-parser/rslib.config.ts"]),
         ("feat(action-parser): setup tsconfig and build settings for parser", ["packages/ui-tars/action-parser/tsconfig.json"]),
         ("feat(action-parser): implement grammar regex for click and double click", ["packages/ui-tars/action-parser/src/actionParser.ts"]),
         ("feat(action-parser): add parser support for type and hotkey actions", ["packages/ui-tars/action-parser/src/actionParser.ts"]),
@@ -212,7 +212,7 @@ DAILY_SCHEDULE = [
     ],
     # Day 25: July 26 (Weekend)
     [
-        ("feat(cli): create @ui-tars/cli interactive agent runner", ["packages/ui-tars/cli"]),
+        ("feat(cli): create @UI-TARs/cli interactive agent runner", ["packages/ui-tars/cli"]),
         ("feat(visualizer): initialize visualizer package for agent action replays", ["packages/ui-tars/visualizer"]),
         ("feat(electron-ipc): define IPC message channels and event contracts", ["packages/ui-tars/electron-ipc"]),
         ("docs(settings): create comprehensive settings and configuration guide", ["docs/setting.md"]),
@@ -431,7 +431,7 @@ DAILY_SCHEDULE = [
         ("feat(recovery): add emergency unstick action for persistent loops", ["packages/ui-tars/sdk/src/GUIAgent.ts"]),
         ("fix(recovery): protect type action from emergency esc clears", ["packages/ui-tars/sdk/src/GUIAgent.ts"]),
         ("test(recovery): add unit tests for sliding-window loop detector", ["packages/ui-tars/sdk/tests/GUIAgent.test.ts"]),
-        ("build(sdk): rebuild @ui-tars/sdk with loop detection engine", ["packages/ui-tars/sdk"]),
+        ("build(sdk): rebuild @UI-TARs/sdk with loop detection engine", ["packages/ui-tars/sdk"]),
     ],
     # Day 56: August 26
     [
@@ -580,14 +580,14 @@ DAILY_SCHEDULE = [
         ("feat(shared): add structured logging formatting utilities with colors", ["packages/ui-tars/shared/src/utils"]),
         ("feat(shared): implement lightweight semaphore for concurrent task throttling", ["packages/ui-tars/shared/src/utils"]),
         ("test(shared): add test coverage for concurrency throttling semaphore", ["packages/ui-tars/shared/tests"]),
-        ("build(shared): rebuild @ui-tars/shared with concurrency helpers", ["packages/ui-tars/shared"]),
+        ("build(shared): rebuild @UI-TARs/shared with concurrency helpers", ["packages/ui-tars/shared"]),
     ],
     # Day 77: September 16
     [
         ("feat(sdk): add support for streaming VLM token reasoning chunks", ["packages/ui-tars/sdk/src/Model.ts"]),
         ("feat(sdk): emit real-time thinking progress events to onData subscribers", ["packages/ui-tars/sdk/src/GUIAgent.ts"]),
         ("test(sdk): add unit tests for streaming token chunk aggregator", ["packages/ui-tars/sdk/tests/GUIAgent.test.ts"]),
-        ("build(sdk): rebuild @ui-tars/sdk package with streaming events", ["packages/ui-tars/sdk"]),
+        ("build(sdk): rebuild @UI-TARs/sdk package with streaming events", ["packages/ui-tars/sdk"]),
     ],
     # Day 78: September 17
     [

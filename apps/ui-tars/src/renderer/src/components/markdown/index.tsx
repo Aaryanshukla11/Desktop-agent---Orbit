@@ -54,16 +54,16 @@ export const Markdown = memo(({ children }: { children: string }) => {
         code: ({ children, className }) => {
           if (!className) {
             return (
-              <code className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded font-mono">
+              <code className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded font-mono select-text">
                 {children}
               </code>
             );
           }
-          return <code className={className}>{children}</code>;
+          return <code className={`select-text ${className}`}>{children}</code>;
         },
         pre: ({ children }) => (
-          <pre className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-3 overflow-x-auto whitespace-pre-wrap">
-            <code className="text-sm font-mono text-gray-800">{children}</code>
+          <pre className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-3 overflow-x-auto whitespace-pre-wrap select-text">
+            <code className="text-sm font-mono text-gray-800 select-text">{children}</code>
           </pre>
         ),
       }}

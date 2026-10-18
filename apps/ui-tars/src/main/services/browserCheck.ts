@@ -1,7 +1,7 @@
 /**
  
  */
-import { DefaultBrowserOperator } from '@ui-tars/operator-browser';
+import { DefaultBrowserOperator } from '@UI-TARs/operator-browser';
 import { logger } from '@main/logger';
 import { store } from '@main/store/create';
 

@@ -1,7 +1,7 @@
 /*
  
  */
-import { initIpc } from '@ui-tars/electron-ipc/main';
+import { initIpc } from '@UI-TARs/electron-ipc/main';
 import { getScreenSize } from '@main/utils/screen';
 
 const t = initIpc.create();

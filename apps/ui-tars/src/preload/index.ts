@@ -4,7 +4,7 @@
 import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
 // import { preloadZustandBridge } from 'zutron/preload';
 
-import type { UTIOPayload } from '@ui-tars/utio';
+import type { UTIOPayload } from '@UI-TARs/utio';
 
 import type { AppState, LocalStore } from '@main/store/types';
 

@@ -1,15 +1,16 @@
 /*
  
  */
-import { initIpc } from '@ui-tars/electron-ipc/main';
-import { StatusEnum, Conversation, Message } from '@ui-tars/shared/types';
+import { initIpc } from '@UI-TARs/electron-ipc/main';
+import { StatusEnum, Conversation, Message } from '@UI-TARs/shared/types';
 import { store } from '@main/store/create';
 import { runAgent } from '@main/services/runAgent';
 import { showWindow } from '@main/window/index';
+import { logger } from '@main/logger';
 
 import { closeScreenMarker } from '@main/window/ScreenMarker';
-import { GUIAgent } from '@ui-tars/sdk';
-import { Operator } from '@ui-tars/sdk/core';
+import { GUIAgent } from '@UI-TARs/sdk';
+import { Operator } from '@UI-TARs/sdk/core';
 
 const t = initIpc.create();
 
@@ -44,7 +45,7 @@ export const agentRoute = t.router({
   runAgent: t.procedure.input<void>().handle(async () => {
     const { thinking } = store.getState();
     if (thinking) {
-      return;
+      logger.warn('[agentRoute.runAgent] Already in thinking state; clearing stale state and proceeding');
     }
 
     store.setState({
@@ -53,9 +54,18 @@ export const agentRoute = t.router({
       errorMsg: null,
     });
 
-    await runAgent(store.setState, store.getState);
-
-    store.setState({ thinking: false });
+    try {
+      await runAgent(store.setState, store.getState);
+    } catch (err: any) {
+      logger.error('[agentRoute.runAgent] Unhandled error during agent execution:', err);
+      store.setState({
+        status: StatusEnum.ERROR,
+        
+        errorMsg: err?.message || String(err),
+      });
+    } finally {
+      store.setState({ thinking: false });
+    }
   }),
   pauseRun: t.procedure.input<void>().handle(async () => {
     const guiAgent = GUIAgentManager.getInstance().getAgent();
@@ -109,5 +119,19 @@ export const agentRoute = t.router({
       errorMsg: null,
       instructions: '',
     });
+  }),
+  getExperienceStats: t.procedure.input<void>().handle(async () => {
+    const { OrbitExperienceEngine } = await import('@main/services/experienceEngine');
+    return OrbitExperienceEngine.getInstance().getStats();
+  }),
+  getExperienceGuidance: t.procedure
+    .input<{ instruction: string }>()
+    .handle(async ({ input }) => {
+      const { OrbitExperienceEngine } = await import('@main/services/experienceEngine');
+      return OrbitExperienceEngine.getInstance().getGuidanceForTask(input.instruction);
+    }),
+  getMacrosList: t.procedure.input<void>().handle(async () => {
+    const { OrbitMacroEngine } = await import('@main/services/macroEngine');
+    return OrbitMacroEngine.getInstance().getMacrosList();
   }),
 });

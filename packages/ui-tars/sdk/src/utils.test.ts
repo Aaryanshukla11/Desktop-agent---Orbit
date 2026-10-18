@@ -3,14 +3,13 @@
  
  */
 import { describe, expect, it } from 'vitest';
-
 import {
   parseBoxToScreenCoords,
   processVlmParams,
   toVlmModelFormat,
 } from './utils';
 import { DEFAULT_FACTORS } from './constants';
-import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@UI-TARs/shared/constants';
+import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 
 describe('parseBoxToScreenCoords', () => {
   it('should correctly parse single point coordinates', () => {

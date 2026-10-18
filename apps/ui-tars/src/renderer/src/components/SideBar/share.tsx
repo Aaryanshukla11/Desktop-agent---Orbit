@@ -17,12 +17,12 @@ import {
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog';
 import { DropdownMenuItem } from '@renderer/components/ui/dropdown-menu';
-import { ComputerUseUserData } from '@ui-tars/shared/types';
+import { ComputerUseUserData } from '@UI-TARs/shared/types';
 import { reportHTMLContent } from '@renderer/utils/html';
 import { uploadReport } from '@renderer/utils/share';
 import { useStore } from '@renderer/hooks/useStore';
 import { useSetting } from '@renderer/hooks/useSetting';
-import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
+import { IMAGE_PLACEHOLDER } from '@UI-TARs/shared/constants';
 import { useSession } from '@renderer/hooks/useSession';
 import { chatManager } from '@renderer/db/chat';
 

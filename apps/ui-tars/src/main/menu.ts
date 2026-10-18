@@ -1,7 +1,7 @@
 /**
  
  */
-import { BrowserWindow, Menu, MenuItemConstructorOptions, app } from 'electron';
+import { BrowserWindow, Menu, MenuItemConstructorOptions, app, clipboard, shell } from 'electron';
 
 import { isDev } from '@main/env';
 
@@ -23,10 +23,7 @@ export default class MenuBuilder {
   }
 
   buildMenu(): Menu {
-    if (isDev) {
-      // FIXME: 开发环境不显示 devtools
-      this.setupDevelopmentEnvironment();
-    }
+    this.setupContextMenu();
 
     const template =
       process.platform === 'darwin'
@@ -39,18 +36,77 @@ export default class MenuBuilder {
     return menu;
   }
 
-  setupDevelopmentEnvironment(): void {
+  setupContextMenu(): void {
     this.browserWindow.webContents.on('context-menu', (_, props) => {
-      const { x, y } = props;
+      const { isEditable, selectionText, editFlags, x, y, linkURL } = props;
+      const menuItems: MenuItemConstructorOptions[] = [];
 
-      Menu.buildFromTemplate([
-        {
-          label: 'Inspect element',
-          click: () => {
-            this.browserWindow.webContents.inspectElement(x, y);
+      if (linkURL) {
+        menuItems.push(
+          {
+            label: 'Open Link in Browser',
+            click: () => {
+              shell.openExternal(linkURL);
+            },
           },
-        },
-      ]).popup({ window: this.browserWindow });
+          {
+            label: 'Copy Link Address',
+            click: () => {
+              clipboard.writeText(linkURL);
+            },
+          },
+          { type: 'separator' },
+        );
+      }
+
+      if (isEditable) {
+        menuItems.push(
+          { label: 'Undo', role: 'undo', enabled: editFlags.canUndo },
+          { label: 'Redo', role: 'redo', enabled: editFlags.canRedo },
+          { type: 'separator' },
+          { label: 'Cut', role: 'cut', enabled: editFlags.canCut },
+          { label: 'Copy', role: 'copy', enabled: editFlags.canCopy },
+          { label: 'Paste', role: 'paste', enabled: editFlags.canPaste },
+          {
+            label: 'Paste and Match Style',
+            role: 'pasteAndMatchStyle',
+            enabled: editFlags.canPaste,
+          },
+          { label: 'Delete', role: 'delete', enabled: editFlags.canDelete },
+          { type: 'separator' },
+          {
+            label: 'Select All',
+            role: 'selectAll',
+            enabled: editFlags.canSelectAll,
+          },
+        );
+      } else if (selectionText && selectionText.trim().length > 0) {
+        menuItems.push(
+          { label: 'Copy', role: 'copy' },
+          { type: 'separator' },
+          { label: 'Select All', role: 'selectAll' },
+        );
+      } else {
+        menuItems.push(
+          { label: 'Select All', role: 'selectAll' },
+        );
+      }
+
+      if (isDev) {
+        menuItems.push(
+          { type: 'separator' },
+          {
+            label: 'Inspect Element',
+            click: () => {
+              this.browserWindow.webContents.inspectElement(x, y);
+            },
+          },
+        );
+      }
+
+      if (menuItems.length > 0) {
+        Menu.buildFromTemplate(menuItems).popup({ window: this.browserWindow });
+      }
     });
   }
 
@@ -89,15 +145,23 @@ export default class MenuBuilder {
     const subMenuEdit: DarwinMenuItemConstructorOptions = {
       label: 'Edit',
       submenu: [
-        { label: 'Undo', accelerator: 'Command+Z', selector: 'undo:' },
-        { label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:' },
+        { label: 'Undo', accelerator: 'Command+Z', role: 'undo', selector: 'undo:' },
+        { label: 'Redo', accelerator: 'Shift+Command+Z', role: 'redo', selector: 'redo:' },
         { type: 'separator' },
-        { label: 'Cut', accelerator: 'Command+X', selector: 'cut:' },
-        { label: 'Copy', accelerator: 'Command+C', selector: 'copy:' },
-        { label: 'Paste', accelerator: 'Command+V', selector: 'paste:' },
+        { label: 'Cut', accelerator: 'Command+X', role: 'cut', selector: 'cut:' },
+        { label: 'Copy', accelerator: 'Command+C', role: 'copy', selector: 'copy:' },
+        { label: 'Paste', accelerator: 'Command+V', role: 'paste', selector: 'paste:' },
+        {
+          label: 'Paste and Match Style',
+          accelerator: 'Shift+Command+V',
+          role: 'pasteAndMatchStyle',
+        },
+        { label: 'Delete', role: 'delete' },
+        { type: 'separator' },
         {
           label: 'Select All',
           accelerator: 'Command+A',
+          role: 'selectAll',
           selector: 'selectAll:',
         },
       ],
@@ -206,7 +270,7 @@ export default class MenuBuilder {
   }
 
   buildDefaultTemplate() {
-    const templateDefault = [
+    const templateDefault: MenuItemConstructorOptions[] = [
       {
         label: '&File',
         submenu: [
@@ -221,6 +285,25 @@ export default class MenuBuilder {
               this.browserWindow.close();
             },
           },
+        ],
+      },
+      {
+        label: '&Edit',
+        submenu: [
+          { label: '&Undo', accelerator: 'Ctrl+Z', role: 'undo' },
+          { label: '&Redo', accelerator: 'Ctrl+Y', role: 'redo' },
+          { type: 'separator' },
+          { label: 'Cu&t', accelerator: 'Ctrl+X', role: 'cut' },
+          { label: '&Copy', accelerator: 'Ctrl+C', role: 'copy' },
+          { label: '&Paste', accelerator: 'Ctrl+V', role: 'paste' },
+          {
+            label: 'Paste and &Match Style',
+            accelerator: 'Ctrl+Shift+V',
+            role: 'pasteAndMatchStyle',
+          },
+          { label: '&Delete', role: 'delete' },
+          { type: 'separator' },
+          { label: 'Select &All', accelerator: 'Ctrl+A', role: 'selectAll' },
         ],
       },
       {

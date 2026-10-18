@@ -118,17 +118,14 @@ export function parseActionVlm(
   text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
   if (mode === 'bc') {
     // Parse thought/reflection based on different text patterns
-    if (text.includes('Thought:')) {
-      const thoughtMatch = text.match(
-        /Thought: ([\s\S]+?)(?=\s*Action[:：]|$)/,
-      );
-
-      if (thoughtMatch) {
-        thought = thoughtMatch[1].trim();
-      }
+    const thoughtMatch = text.match(
+      /(?:##\s*)?Thought[:：]\s*([\s\S]+?)(?=\s*(?:##\s*)?Action[:：]|$)/i,
+    );
+    if (thoughtMatch) {
+      thought = thoughtMatch[1].trim();
     } else if (text.startsWith('Reflection:')) {
       const reflectionMatch = text.match(
-        /Reflection: ([\s\S]+?)Action_Summary: ([\s\S]+?)(?=\s*Action[:：]|$)/,
+        /Reflection:\s*([\s\S]+?)Action_Summary:\s*([\s\S]+?)(?=\s*(?:##\s*)?Action[:：]|$)/i,
       );
       if (reflectionMatch) {
         thought = reflectionMatch[2].trim();
@@ -136,15 +133,15 @@ export function parseActionVlm(
       }
     } else if (text.startsWith('Action_Summary:')) {
       const summaryMatch = text.match(
-        /Action_Summary: (.+?)(?=\s*Action[:：]|$)/,
+        /Action_Summary:\s*(.+?)(?=\s*(?:##\s*)?Action[:：]|$)/i,
       );
       if (summaryMatch) {
         thought = summaryMatch[1].trim();
       }
     }
 
-    if (['Action:', 'Action：'].some((keyword) => text.includes(keyword))) {
-      const actionParts = text.split(/Action[:：]/);
+    if (/(?:##\s*)?Action[:：]/i.test(text)) {
+      const actionParts = text.split(/(?:##\s*)?Action[:：]/i);
       actionStr = actionParts[actionParts.length - 1];
     } else {
       actionStr = text;

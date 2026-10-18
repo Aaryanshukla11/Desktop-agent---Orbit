@@ -9,11 +9,11 @@ import {
   Operator,
   parseBoxToScreenCoords,
   StatusEnum,
-} from '@ui-tars/sdk/core';
-import { RemoteBrowserOperator } from '@ui-tars/operator-browser';
+} from '@UI-TARs/sdk/core';
+import { RemoteBrowserOperator } from '@UI-TARs/operator-browser';
 
 import { logger } from '@main/logger';
-import { sleep } from '@ui-tars/shared/utils';
+import { sleep } from '@UI-TARs/shared/utils';
 import { BaseRemoteComputer } from './shared';
 import { ProxyClient, RemoteComputer, SandboxInfo } from './proxyClient';
 import { SubsRemoteComputer } from './subscriptionClient';

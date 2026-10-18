@@ -1,7 +1,7 @@
 /*
  
  */
-import { initIpc, createServer } from '@ui-tars/electron-ipc/main';
+import { initIpc, createServer } from '@UI-TARs/electron-ipc/main';
 import { screenRoute } from './screen';
 import { windowRoute } from './window';
 import { permissionRoute } from './permission';

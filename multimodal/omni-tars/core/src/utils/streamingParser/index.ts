@@ -3,6 +3,7 @@
  */
 import {
   ChatCompletionChunk,
+  ChatCompletionMessageToolCall,
   StreamChunkResult,
   StreamingToolCallUpdate,
   StreamProcessingState,
@@ -11,6 +12,8 @@ import { extractThink, extractAnswer } from './extractors';
 import { extractCodeEnv } from './extractCode';
 
 export interface OmniStreamProcessingState extends StreamProcessingState {
+  toolCalls: ChatCompletionMessageToolCall[];
+
   // Additional state for tag parsing
   currentTag?: 'think' | 'answer' | 'code_env' | null;
   insideThink?: boolean;

@@ -9,7 +9,19 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@tarko/agent": ["../../tarko/agent/src/index.ts"],
+      "@tarko/agent/*": ["../../tarko/agent/src/*"],
+      "@tarko/agent-interface": ["../../tarko/agent-interface/src/index.ts"],
+      "@tarko/agent-interface/*": ["../../tarko/agent-interface/src/*"],
+      "@tarko/model-provider/types": ["../../tarko/model-provider/src/types.ts"],
+      "@tarko/model-provider": ["../../tarko/model-provider/src/index.ts"],
+      "@tarko/model-provider/*": ["../../tarko/model-provider/src/*"],
+      "@tarko/llm-client": ["../../tarko/llm-client/src/index.ts"],
+      "@tarko/llm-client/*": ["../../tarko/llm-client/src/*"]
+    }
   },
   "include": [
     "src/**/*"

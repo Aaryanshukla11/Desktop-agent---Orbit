@@ -7,6 +7,20 @@ vi.mock('@main/window', () => ({
   showWindow: vi.fn(),
 }));
 
+vi.mock('electron-updater', () => ({
+  autoUpdater: {
+    on: vi.fn(),
+    setFeedURL: vi.fn(),
+    checkForUpdatesAndNotify: vi.fn(),
+    checkForUpdates: vi.fn(),
+  },
+  AppUpdater: vi.fn(),
+}));
+
+vi.mock('@main/utils/updateApp', () => ({
+  AppUpdater: vi.fn(),
+}));
+
 describe('windowRoute.showMainWindow', () => {
   beforeEach(() => {
     vi.clearAllMocks();

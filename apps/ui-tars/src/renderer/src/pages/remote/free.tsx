@@ -18,7 +18,7 @@ import { ScrollArea } from '@renderer/components/ui/scroll-area';
 import { useStore } from '@renderer/hooks/useStore';
 import { useSession } from '@renderer/hooks/useSession';
 import Prompts from '../../components/Prompts';
-import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
+import { IMAGE_PLACEHOLDER } from '@UI-TARs/shared/constants';
 import {
   AssistantTextMessage,
   ErrorMessage,
@@ -33,7 +33,7 @@ import ChatInput from '../../components/ChatInput';
 import { CountDown } from '../../components/CountDown';
 import { TerminateDialog } from '../../components/AlertDialog/terminateDialog';
 
-import { PredictionParsed, StatusEnum } from '@ui-tars/shared/types';
+import { PredictionParsed, StatusEnum } from '@UI-TARs/shared/types';
 import { Operator } from '@main/store/types';
 import { api } from '../../api';
 import { useRemoteResource } from '../../hooks/useRemoteResource';

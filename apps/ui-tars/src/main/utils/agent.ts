@@ -1,4 +1,4 @@
-import { UITarsModelVersion } from '@ui-tars/shared/constants';
+import { UITarsModelVersion } from '@UI-TARs/shared/constants';
 import {
   Operator,
   SearchEngineForSettings,
@@ -18,7 +18,7 @@ import {
   showWidgetWindow,
 } from '../window/ScreenMarker';
 import { hideMainWindow, showMainWindow } from '../window';
-import { SearchEngine } from '@ui-tars/operator-browser';
+import { SearchEngine } from '@UI-TARs/operator-browser';
 
 export const getModelVersion = (
   provider: VLMProviderV2 | undefined,

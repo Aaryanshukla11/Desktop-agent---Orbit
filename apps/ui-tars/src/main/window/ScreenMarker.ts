@@ -8,7 +8,7 @@
  */
 import { BrowserWindow, screen, app } from 'electron';
 
-import { PredictionParsed, Conversation } from '@ui-tars/shared/types';
+import { PredictionParsed, Conversation } from '@UI-TARs/shared/types';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
@@ -229,9 +229,13 @@ class ScreenMarker {
           webPreferences: { nodeIntegration: true, contextIsolation: false },
           ...(overlay.xPos &&
             overlay.yPos && {
-              // logical pixels: overlay.xPos is physical, convert to logical DIPs
-              x: Math.round((overlay.xPos + overlay.offsetX) / (env.isMacOS ? 1 : scaleFactor)),
-              y: Math.round((overlay.yPos + overlay.offsetY) / (env.isMacOS ? 1 : scaleFactor)),
+              // logical pixels: overlay.xPos is physical, convert to logical DIPs before adding logical offsets
+              x: Math.round(
+                overlay.xPos / (env.isMacOS ? 1 : scaleFactor) + overlay.offsetX,
+              ),
+              y: Math.round(
+                overlay.yPos / (env.isMacOS ? 1 : scaleFactor) + overlay.offsetY,
+              ),
             }),
         });
 

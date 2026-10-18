@@ -3,14 +3,14 @@
  */
 import { toast } from 'sonner';
 
-import { Conversation } from '@ui-tars/shared/types';
+import { Conversation } from '@UI-TARs/shared/types';
 import { getState } from '@renderer/hooks/useStore';
 
 import { usePermissions } from './usePermissions';
 import { useSetting } from './useSetting';
 import { api } from '@renderer/api';
 import { ConversationWithSoM } from '@/main/shared/types';
-import { Message } from '@ui-tars/shared/types';
+import { Message } from '@UI-TARs/shared/types';
 import { Operator } from '@/main/store/types';
 
 const filterAndTransformWithMap = (

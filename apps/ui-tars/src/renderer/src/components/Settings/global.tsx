@@ -57,35 +57,35 @@ export const GlobalSettings = () => {
             <TabsList className="flex flex-col h-fit w-full bg-transparent p-0">
               <TabsTrigger
                 value="vlm"
-                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+                className="w-full justify-start gap-2 px-3 py-2 mb-1.5 rounded-xl !shadow-none font-normal text-slate-600 dark:text-slate-400 data-[state=active]:font-medium data-[state=active]:bg-black/10 dark:data-[state=active]:bg-white/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all"
               >
                 <Sparkles strokeWidth={2} />
                 VLM Settings
               </TabsTrigger>
               <TabsTrigger
                 value="chat"
-                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+                className="w-full justify-start gap-2 px-3 py-2 mb-1.5 rounded-xl !shadow-none font-normal text-slate-600 dark:text-slate-400 data-[state=active]:font-medium data-[state=active]:bg-black/10 dark:data-[state=active]:bg-white/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all"
               >
                 <MessagesSquare strokeWidth={2} />
                 Chat Settings
               </TabsTrigger>
               <TabsTrigger
                 value="operator"
-                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+                className="w-full justify-start gap-2 px-3 py-2 mb-1.5 rounded-xl !shadow-none font-normal text-slate-600 dark:text-slate-400 data-[state=active]:font-medium data-[state=active]:bg-black/10 dark:data-[state=active]:bg-white/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all"
               >
                 <Cpu strokeWidth={2} />
                 Operator Settings
               </TabsTrigger>
               <TabsTrigger
                 value="report"
-                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+                className="w-full justify-start gap-2 px-3 py-2 mb-1.5 rounded-xl !shadow-none font-normal text-slate-600 dark:text-slate-400 data-[state=active]:font-medium data-[state=active]:bg-black/10 dark:data-[state=active]:bg-white/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all"
               >
                 <FileText strokeWidth={2} />
                 Report Settings
               </TabsTrigger>
               <TabsTrigger
                 value="general"
-                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+                className="w-full justify-start gap-2 px-3 py-2 mb-1.5 rounded-xl !shadow-none font-normal text-slate-600 dark:text-slate-400 data-[state=active]:font-medium data-[state=active]:bg-black/10 dark:data-[state=active]:bg-white/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all"
               >
                 <Settings strokeWidth={2} />
                 General Settings

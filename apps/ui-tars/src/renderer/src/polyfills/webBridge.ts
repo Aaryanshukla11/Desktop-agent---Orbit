@@ -8,7 +8,7 @@ if (typeof window !== 'undefined' && !window.electron) {
 
   // Use current host for API requests (supports IP access like http://192.168.x.x:5173)
   const isViteDev = window.location.port === '5173';
-  const apiBase = isViteDev ? '' : `http://${window.location.hostname}:5174`;
+  const apiBase = isViteDev ? '' : `http://${window.location.hostname}:5182`;
 
   // Retrieve authentication token from URL parameter, localStorage, or injected global
   const searchParams = new URLSearchParams(window.location.search);
@@ -18,7 +18,7 @@ if (typeof window !== 'undefined' && !window.electron) {
       localStorage.setItem('orbit_bridge_token', paramToken);
     } catch {}
   }
-  const bridgeToken =
+  let bridgeToken =
     paramToken ||
     (typeof localStorage !== 'undefined'
       ? localStorage.getItem('orbit_bridge_token')
@@ -26,12 +26,36 @@ if (typeof window !== 'undefined' && !window.electron) {
     (window as any).__ORBIT_BRIDGE_TOKEN__ ||
     '';
 
+  // If running on localhost and no token is present, auto-fetch from loopback endpoint
+  if (!bridgeToken && typeof fetch !== 'undefined') {
+    fetch(`${apiBase}/api/token`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.token) {
+          bridgeToken = data.token;
+          try {
+            localStorage.setItem('orbit_bridge_token', data.token);
+          } catch {}
+          if (!eventSource) {
+            initEventStream();
+          }
+        }
+      })
+      .catch(() => {});
+  }
+
   const getAuthHeaders = (): Record<string, string> => {
+    const currentToken =
+      bridgeToken ||
+      (typeof localStorage !== 'undefined'
+        ? localStorage.getItem('orbit_bridge_token')
+        : '') ||
+      '';
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (bridgeToken) {
-      headers['x-orbit-token'] = bridgeToken;
+    if (currentToken) {
+      headers['x-orbit-token'] = currentToken;
     }
     return headers;
   };

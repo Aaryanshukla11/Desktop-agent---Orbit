@@ -227,22 +227,22 @@ export default function Settings() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="h-screen flex flex-col orbit-glass-bg text-slate-800 dark:text-slate-100">
       <DragArea />
 
-      <div className="flex-1 flex gap-4 p-6 overflow-hidden">
+      <div className="flex-1 flex gap-6 p-6 overflow-hidden">
         <Tabs
           orientation="vertical"
           value={activeSection}
           onValueChange={scrollToSection}
-          className="w-34 shrink-0"
+          className="w-36 shrink-0"
         >
-          <TabsList className="flex flex-col h-auto bg-transparent p-0">
+          <TabsList className="flex flex-col h-auto bg-transparent p-0 gap-1">
             {Object.entries(SECTIONS).map(([key, label]) => (
               <TabsTrigger
                 key={key}
                 value={key}
-                className="justify-start w-full rounded-none border-0 border-l-4 data-[state=active]:shadow-none data-[state=active]:border-primary mb-1"
+                className="justify-start w-full rounded-xl px-3 py-2 text-sm text-slate-600 dark:text-slate-400 data-[state=active]:bg-black/10 dark:data-[state=active]:bg-white/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white transition-all"
               >
                 {label}
               </TabsTrigger>
@@ -264,7 +264,7 @@ export default function Settings() {
                 {!isRemoteAutoUpdatedPreset && (
                   <Button
                     type="button"
-                    variant="outline"
+                    className="orbit-glass-button rounded-xl"
                     onClick={handlePresetModal}
                   >
                     Import Preset Config
