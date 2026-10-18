@@ -5,18 +5,20 @@ import { logger } from '../../logger';
 import { ExcelMcpBridge } from './bridge/excelMcpBridge';
 import { TaskTelemetry } from '../../services/taskTelemetry';
 import { AiExcelPlanner } from './generator/aiExcelPlanner';
-import { TransactionalWorkspace } from './core/transactionalWorkspace';
+import { ExcelSessionManager } from './excelSessionManager';
+import { ExcelContinuationEngine } from './excelContinuationEngine';
 
 export function isExcelTask(instructions: string): boolean {
   if (!instructions || typeof instructions !== 'string') return false;
   const lower = instructions.toLowerCase();
 
-  const mentionsExcel =
+  const mentionsExcelExplicit =
     lower.includes('excel') ||
     lower.includes('sheet') ||
     lower.includes('xlsx') ||
     lower.includes('workbook') ||
-    lower.includes('csv');
+    lower.includes('csv') ||
+    lower.includes('spreadsheet');
 
   const mentionsAction =
     lower.includes('dummy data') ||
@@ -36,7 +38,102 @@ export function isExcelTask(instructions: string): boolean {
     lower.includes('patient') ||
     lower.includes('clean');
 
-  return mentionsExcel && mentionsAction;
+  // Case 1: Explicit standalone Excel task
+  if (mentionsExcelExplicit && mentionsAction) {
+    return true;
+  }
+
+  // Case 2: Multi-turn continuation task when an Excel workbook session exists
+  if (ExcelSessionManager.hasActiveSession()) {
+    // Exclude unrelated operations
+    const isExplicitlyDifferent =
+      (lower.includes('open chrome') ||
+        lower.includes('open browser') ||
+        lower.includes('youtube') ||
+        lower.includes('google search') ||
+        lower.includes('notepad')) &&
+      !mentionsExcelExplicit;
+
+    if (isExplicitlyDifferent) {
+      return false;
+    }
+
+    const continuationKeywords = [
+      'add',
+      'column',
+      'col',
+      'bonus',
+      'salary',
+      'calculate',
+      'sum',
+      'total',
+      'average',
+      'avg',
+      'formula',
+      'tax',
+      'commission',
+      'net',
+      'gross',
+      'deduct',
+      'percent',
+      'percentage',
+      '%',
+      'sort',
+      'filter',
+      'clean',
+      'deduplicate',
+      'duplicate',
+      'trim',
+      'normalize',
+      'chart',
+      'graph',
+      'plot',
+      'pie',
+      'bar',
+      'update',
+      'change',
+      'replace',
+      'insert',
+      'delete',
+      'remove',
+      'append',
+      'row',
+      'record',
+      'sheet',
+      'table',
+      // Hindi / Hinglish continuation patterns:
+      'isme',
+      'ismein',
+      'usme',
+      'usmein',
+      'is sheet',
+      'iss sheet',
+      'is file',
+      'ye data',
+      'ab isme',
+      'aur isme',
+      'bhi add',
+      'kardo',
+      'kar do',
+      'banao',
+      'daalo',
+      'dikhao',
+      'badha do',
+      'ghata do',
+      'hata do',
+      'rakho',
+      'nikalo',
+      'nikaalo',
+    ];
+
+    const hasContinuationKeyword = continuationKeywords.some((kw) => lower.includes(kw));
+    if (hasContinuationKeyword) {
+      logger.info(`[excelChatRouter] Contextual Excel continuation task detected for: "${instructions}"`);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export async function runExcelTask(
@@ -48,8 +145,33 @@ export async function runExcelTask(
   logMarkdown?: string;
   filePath?: string;
 }> {
-  logger.info('[excelChatRouter] Executing dynamic autonomous Excel task for instructions:', instructions);
+  logger.info('[excelChatRouter] Executing autonomous Excel task for instructions:', instructions);
 
+  const lower = instructions.toLowerCase();
+  const activeSession = ExcelSessionManager.getActiveSession();
+
+  // Check if this is a continuation on the active session
+  const isExplicitNewCreation =
+    (lower.includes('create a new') || lower.includes('create new') || lower.includes('fresh') || lower.includes('open new')) &&
+    (lower.includes('sheet') || lower.includes('excel') || lower.includes('workbook') || lower.includes('file'));
+
+  if (activeSession && !isExplicitNewCreation) {
+    logger.info(`[excelChatRouter] Routing to ExcelContinuationEngine on active workbook: ${activeSession.filePath}`);
+    try {
+      const continuationEngine = new ExcelContinuationEngine();
+      const res = await continuationEngine.executeContinuation(instructions, activeSession, onProgress);
+      return {
+        success: res.success,
+        summaryMarkdown: res.summaryMarkdown,
+        logMarkdown: res.logMarkdown,
+        filePath: res.filePath,
+      };
+    } catch (contErr: any) {
+      logger.warn('[excelChatRouter] Continuation engine encountered error, falling back to full planner:', contErr?.message || contErr);
+    }
+  }
+
+  // Standard Creation Workflow
   const runDir = path.resolve(process.cwd(), 'runs', `T0-${new Date().toISOString().replace(/[:.]/g, '-')}`);
   const telemetry = new TaskTelemetry(`T0-${Date.now()}`, instructions, 'ExcelMcp Specialist', runDir);
 
@@ -66,11 +188,10 @@ export async function runExcelTask(
     }
 
     const destPath = path.join(targetDir, plan.fileName);
-    const workspace = new TransactionalWorkspace(destPath);
 
     const mcpBridge = new ExcelMcpBridge();
     await mcpBridge.createDynamicWorkbook({
-      destPath: workspace.getShadowTempPath(),
+      destPath,
       mainSheetName: plan.mainSheetName,
       headers: plan.headers,
       rows: plan.rows,
@@ -83,8 +204,21 @@ export async function runExcelTask(
       onProgress,
     });
 
-    const pubRes = workspace.publish(false);
-    const finalPublishedPath = pubRes.publishedPath;
+    const finalPublishedPath = destPath;
+
+    // Save active session for seamless continuation in subsequent chat turns
+    ExcelSessionManager.setActiveSession({
+      filePath: finalPublishedPath,
+      fileName: plan.fileName,
+      mainSheetName: plan.mainSheetName,
+      headers: plan.headers,
+      rowCount: plan.rows.length,
+      lastUpdated: Date.now(),
+      summarySheetName: plan.summarySheetName,
+      chartTitle: plan.chartTitle,
+      chartType: plan.chartType,
+      domainName: plan.domainName,
+    });
 
     logger.info(`[excelChatRouter] Completed successfully. Target workbook: ${finalPublishedPath}`);
 
@@ -116,7 +250,7 @@ Generated **${plan.rows.length} records** for **${plan.domainName}** with live s
 - **Primary Sheet**: \`${plan.mainSheetName}\` (${plan.headers.length} columns)
 - **Analytics Sheet**: \`${plan.summarySheetName}\` with reactive formulas
 - **Chart**: ${plan.chartTitle}
-- **Transaction Safety**: Verified via Recoverable Replacement Protocol
+- **Active Session**: Session state preserved for follow-up continuation commands (e.g. *"ab isme bonus column add kar do"*, *"sort by salary"*, *"calculate average"*)
 
 *Detailed breakdown and telemetry metrics are recorded in the **Log** tab at the top.*`;
 
