@@ -99,9 +99,8 @@ export const runAgent = async (
   }
 
   // Autonomous Excel Specialist Fast-Path Interceptor
-  if (settings.operator === Operator.LocalComputer && process.platform === 'win32') {
-    if (isExcelTask(instructions)) {
-      logger.info('[runAgent] Routing to Autonomous Excel Specialist Agent (ExcelMcp Live Mode)!');
+  if (process.platform === 'win32' && isExcelTask(instructions)) {
+    logger.info('[runAgent] Routing to Autonomous Excel Specialist Agent (ExcelMcp Live Mode)!');
 
       // Desktop takeover: hide main window, show floating widget pill & neon border glow
       await beforeAgentRun(settings.operator);
@@ -186,7 +185,6 @@ export const runAgent = async (
         afterAgentRun(settings.operator);
       }
     }
-  }
 
   // Tier-1 Fast-Path Interceptor: Before invoking vlm.predict() with a 2,000-token screenshot,
   // test if the element exists in the current foreground window's UIA tree. If yes, fire instant native click.

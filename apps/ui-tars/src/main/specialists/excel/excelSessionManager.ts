@@ -44,15 +44,27 @@ export class ExcelSessionManager {
     if (this.mockExcelRunning !== null) return this.mockExcelRunning;
     if (process.platform !== 'win32') return false;
     try {
-      const stdout = execSync('tasklist /FI "IMAGENAME eq excel.exe" /NH', {
+      const tasklistCmd = process.env.SystemRoot
+        ? path.join(process.env.SystemRoot, 'System32', 'tasklist.exe')
+        : 'tasklist.exe';
+      const stdout = execSync(`"${tasklistCmd}" /FI "IMAGENAME eq excel.exe" /NH`, {
         encoding: 'utf8',
         windowsHide: true,
-        timeout: 1500,
+        timeout: 2000,
       });
-      return stdout.toLowerCase().includes('excel.exe');
-    } catch {
-      return false;
-    }
+      if (stdout.toLowerCase().includes('excel.exe')) return true;
+    } catch {}
+
+    try {
+      const out = execSync('powershell.exe -NoProfile -Command "[bool](Get-Process excel -ErrorAction SilentlyContinue)"', {
+        encoding: 'utf8',
+        windowsHide: true,
+        timeout: 2000,
+      });
+      if (out.trim().toLowerCase() === 'true') return true;
+    } catch {}
+
+    return false;
   }
 
   /**

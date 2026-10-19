@@ -40,6 +40,7 @@ export function isExcelTask(instructions: string): boolean {
 
   // Case 1: Explicit standalone Excel task
   if (mentionsExcelExplicit && mentionsAction) {
+    logger.info(`[isExcelTask] Match Case 1 (Explicit standalone Excel task): "${instructions}"`);
     return true;
   }
 
@@ -63,6 +64,7 @@ export function isExcelTask(instructions: string): boolean {
 
     const continuationKeywords = [
       'add',
+      'row',
       'column',
       'col',
       'bonus',
@@ -106,6 +108,9 @@ export function isExcelTask(instructions: string): boolean {
       'score',
       'attendance',
       'student',
+      'sales',
+      'date',
+      'dates',
       'update',
       'change',
       'replace',
@@ -113,7 +118,6 @@ export function isExcelTask(instructions: string): boolean {
       'delete',
       'remove',
       'append',
-      'row',
       'record',
       'sheet',
       'table',
@@ -144,9 +148,32 @@ export function isExcelTask(instructions: string): boolean {
 
     const hasContinuationKeyword = continuationKeywords.some((kw) => lower.includes(kw));
     if (hasContinuationKeyword) {
-      logger.info(`[excelChatRouter] Contextual Excel continuation task detected for: "${instructions}"`);
+      logger.info(`[isExcelTask] Match Case 2 (Excel continuation task): "${instructions}"`);
       return true;
     }
+  }
+
+  // Case 3: Prompt strongly specifies a tabular operation (e.g. "pie chart of...", "add a row of...", "add column...", "sort by...")
+  const strongTabularKeywords = [
+    'pie chart',
+    'bar chart',
+    'column chart',
+    'line chart',
+    'add a row',
+    'add row',
+    'insert a row',
+    'insert row',
+    'add a column',
+    'add column',
+    'insert column',
+    'sort by',
+    'calculate average',
+    'calculate sum',
+    'calculate total',
+  ];
+  if (strongTabularKeywords.some((kw) => lower.includes(kw))) {
+    logger.info(`[isExcelTask] Match Case 3 (Strong tabular operation keyword): "${instructions}"`);
+    return true;
   }
 
   return false;

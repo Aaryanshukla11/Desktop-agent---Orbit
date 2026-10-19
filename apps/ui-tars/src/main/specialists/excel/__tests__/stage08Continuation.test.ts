@@ -71,9 +71,18 @@ describe('Stage 08: Multi-Turn Excel Continuation & Conversational Context', () 
   it('recognizes continuation task when Excel process is running even without prior session', () => {
     ExcelSessionManager.mockExcelRunning = true;
     expect(isExcelTask('now make a pie chart of marks in each subject')).toBe(true);
+    expect(isExcelTask('add a row of sales dates ')).toBe(true);
     expect(isExcelTask('ab isme bonus column add kar do')).toBe(true);
     expect(isExcelTask('salary ke hisaab se sort kardo')).toBe(true);
     ExcelSessionManager.mockExcelRunning = false;
+  });
+
+  it('recognizes strong tabular operations even without prior session or running excel', () => {
+    ExcelSessionManager.mockExcelRunning = false;
+    expect(isExcelTask('add a row of sales dates ')).toBe(true);
+    expect(isExcelTask('pie chart of marks in each subject')).toBe(true);
+    expect(isExcelTask('add a column for bonus')).toBe(true);
+    expect(isExcelTask('sort by salary')).toBe(true);
   });
 
   it('correctly accepts standalone initial Excel task', () => {

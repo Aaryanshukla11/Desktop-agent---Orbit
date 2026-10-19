@@ -41,6 +41,11 @@ export class ExcelContinuationEngine {
       return this.executeAddChart(instructions, session, onProgress);
     }
 
+    // 2. ADD ROW / INSERT RECORD (e.g. add a row of sales dates, insert row, add record)
+    if (lower.includes('row') || lower.includes('record') || lower.includes('entry') || lower.includes('insert row')) {
+      return this.executeAddRow(instructions, session, onProgress);
+    }
+
     // 2. ADD COLUMN / FORMULA (e.g. bonus, tax, annual salary, email, percentage)
     if (
       lower.includes('bonus') ||
@@ -279,6 +284,131 @@ Successfully added new column **\`${newColName}\`** to the active workbook on sc
       actionTaken: 'ADD_COLUMN',
       summaryMarkdown,
       logMarkdown,
+      filePath: session.filePath,
+    };
+  }
+
+  /**
+   * Action: Add new row / record to the worksheet
+   */
+  private async executeAddRow(
+    instructions: string,
+    session: ActiveExcelSession,
+    onProgress?: (status: string, percentage: number) => void,
+  ): Promise<ContinuationExecutionResult> {
+    onProgress?.('Adding new data row to worksheet...', 50);
+
+    const lower = instructions.toLowerCase();
+    const isSalesDate = lower.includes('date') || lower.includes('sales');
+
+    const scratchDir = path.resolve(process.cwd(), 'scratch');
+    if (!fs.existsSync(scratchDir)) fs.mkdirSync(scratchDir, { recursive: true });
+    const psFile = path.join(scratchDir, `continuation_addrow_${Date.now()}.ps1`);
+
+    const scriptContent = `
+$ErrorActionPreference = 'Stop'
+try {
+    $targetPath = '${session.filePath.replace(/'/g, "''")}'
+    $excel = $null
+    try {
+        $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+    } catch {
+        $excel = New-Object -ComObject Excel.Application
+    }
+    $excel.Visible = $true
+    $excel.DisplayAlerts = $false
+
+    $wb = $null
+    foreach ($w in $excel.Workbooks) {
+        if ($w.FullName -eq $targetPath -or $w.Name -eq '${session.fileName.replace(/'/g, "''")}') {
+            $wb = $w
+            break
+        }
+    }
+    if ($wb -eq $null) {
+        if ($excel.ActiveWorkbook) {
+            $wb = $excel.ActiveWorkbook
+        } elseif ([System.IO.File]::Exists($targetPath)) {
+            $wb = $excel.Workbooks.Open($targetPath)
+        } else {
+            throw "Workbook not found at $targetPath"
+        }
+    }
+
+    $sheet = $wb.ActiveSheet
+    if ($sheet -eq $null) {
+        $sheet = $wb.Sheets.Item(1)
+    }
+
+    $usedRange = $sheet.UsedRange
+    $numRows = $usedRange.Rows.Count
+    $numCols = [Math]::Max($usedRange.Columns.Count, 1)
+
+    $targetRow = $numRows + 1
+    $today = (Get-Date).ToString("yyyy-MM-dd")
+
+    for ($c = 1; $c -le $numCols; $c++) {
+        $hdr = [string]($sheet.Cells.Item(1, $c).Text).ToLower()
+        if (${isSalesDate ? '$true' : '$false'}) {
+            if ($c -eq 1) {
+                $sheet.Cells.Item($targetRow, $c).Value2 = "Sales Date: $today"
+            } elseif ($hdr -match 'date') {
+                $sheet.Cells.Item($targetRow, $c).Value2 = $today
+            } else {
+                $dateVal = (Get-Date).AddDays($c - 1).ToString("yyyy-MM-dd")
+                $sheet.Cells.Item($targetRow, $c).Value2 = $dateVal
+            }
+        } else {
+            if ($hdr -match 'id') {
+                $sheet.Cells.Item($targetRow, $c).Value2 = [string]($numRows)
+            } elseif ($hdr -match 'date') {
+                $sheet.Cells.Item($targetRow, $c).Value2 = $today
+            } elseif ($hdr -match 'name') {
+                $sheet.Cells.Item($targetRow, $c).Value2 = "New Record"
+            } else {
+                $sheet.Cells.Item($targetRow, $c).Value2 = "---"
+            }
+        }
+    }
+
+    $rowRange = $sheet.Range($sheet.Cells.Item($targetRow, 1), $sheet.Cells.Item($targetRow, $numCols))
+    $rowRange.Font.Name = "Segoe UI"
+    $rowRange.Font.Size = 10
+
+    try {
+        $wscript = New-Object -ComObject WScript.Shell
+        $wscript.AppActivate($excel.Caption)
+    } catch {}
+
+    $wb.Save()
+    Write-Output "ORBIT_RESULT:SUCCESS"
+} catch {
+    Write-Output "ORBIT_RESULT:ERROR:$($_.Exception.Message)"
+}
+`;
+
+    fs.writeFileSync(psFile, scriptContent, 'utf8');
+    const execResult = await this.runPowerShellScript(psFile, onProgress);
+    try { fs.unlinkSync(psFile); } catch {}
+
+    if (!execResult.success) {
+      throw new Error(execResult.error || 'Failed to add row to workbook.');
+    }
+
+    ExcelSessionManager.updateRowCount(session.rowCount + 1);
+
+    const summaryMarkdown = `**Excel Row Added Successfully**
+
+Successfully inserted new row into active workbook **\`${session.fileName}\`**!
+- **Action**: Insert Row (${isSalesDate ? 'Sales Dates' : 'Data Record'})
+- **Target Sheet**: \`${session.mainSheetName || 'ActiveSheet'}\`
+- **Updated Row Count**: ${session.rowCount + 1} rows
+- **Status**: Updated live on Microsoft Excel & saved to disk.`;
+
+    return {
+      success: true,
+      actionTaken: 'ADD_ROW',
+      summaryMarkdown,
       filePath: session.filePath,
     };
   }
