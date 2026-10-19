@@ -3,6 +3,7 @@ import * as path from 'path';
 import { spawn } from 'child_process';
 import { logger } from '../../logger';
 import { ActiveExcelSession, ExcelSessionManager } from './excelSessionManager';
+import { AiExcelPlanner } from './generator/aiExcelPlanner';
 
 export interface ContinuationExecutionResult {
   success: boolean;
@@ -75,8 +76,11 @@ export class ExcelContinuationEngine {
       return this.executeCleanData(instructions, session, onProgress);
     }
 
-    // 5. SUMMARY / METRICS (average, total, sum, max, min, highest, lowest)
-    if (lower.includes('average') || lower.includes('avg') || lower.includes('total') || lower.includes('sum') || lower.includes('highest') || lower.includes('lowest') || lower.includes('max') || lower.includes('min')) {
+    // 5. SUMMARY / METRICS (only when calculating or computing metrics)
+    if (
+      /\b(calculate|compute|show|find|what\s+is|get)\s+(average|avg|total|sum|highest|lowest|max|min)\b/i.test(instructions) ||
+      /\b(total\s+(monthly\s+)?payroll|total\s+revenue|total\s+sales|average\s+salary|average\s+marks?)\b/i.test(instructions)
+    ) {
       return this.executeSummaryMetric(instructions, session, onProgress);
     }
 
@@ -85,61 +89,34 @@ export class ExcelContinuationEngine {
   }
 
   /**
-   * Action 1: Add new calculated / formula column
+   * Action 1: Add new calculated / multi-column / tabular data using LLM + 2D SafeArray injection
    */
   private async executeAddColumn(
     instructions: string,
     session: ActiveExcelSession,
     onProgress?: (status: string, percentage: number) => void,
   ): Promise<ContinuationExecutionResult> {
-    onProgress?.('Inspecting active worksheet schema and determining formula calculation...', 25);
+    onProgress?.('AI analyzing active worksheet schema and architecting multi-column table injection...', 25);
 
-    const lower = instructions.toLowerCase();
+    const planner = new AiExcelPlanner();
+    const dataRowCount = session.rowCount || 50;
+    const plan = await planner.planContinuation(instructions, session.headers || [], dataRowCount, onProgress);
 
-    // Determine column name and formula
-    let newColName = 'Bonus (10%)';
-    let formulaPattern = '={salaryLetter}{r} * 0.1';
-    let explanation = '10% of monthly salary';
+    const newHeaders = plan.newHeaders;
+    const rows = plan.rows;
+    const newColCount = newHeaders.length;
+    const explanation = plan.explanation;
 
-    // Percentage extraction (e.g. 15%, 5%, 20%)
-    const pctMatch = instructions.match(/(\d+(?:\.\d+)?)\s*%/);
-    const customPct = pctMatch ? parseFloat(pctMatch[1]) : 10;
-    const factor = customPct / 100;
-
-    if (lower.includes('bonus')) {
-      newColName = customPct !== 10 ? `Bonus (${customPct}%)` : 'Bonus (10%)';
-      formulaPattern = `={salaryLetter}{r} * ${factor}`;
-      explanation = `${customPct}% performance bonus calculated from base salary`;
-    } else if (lower.includes('annual') || lower.includes('yearly')) {
-      newColName = 'Annual Salary ($)';
-      formulaPattern = '={salaryLetter}{r} * 12';
-      explanation = 'Annualized compensation (Monthly Salary * 12)';
-    } else if (lower.includes('tax')) {
-      const taxPct = pctMatch ? customPct : 15;
-      newColName = `Tax Deduction (${taxPct}%)`;
-      formulaPattern = `={salaryLetter}{r} * ${taxPct / 100}`;
-      explanation = `${taxPct}% statutory tax withholding`;
-    } else if (lower.includes('net') || lower.includes('in-hand')) {
-      newColName = 'Net Take-Home ($)';
-      formulaPattern = '={salaryLetter}{r} * 0.85';
-      explanation = 'Net take-home pay after standard 15% deductions';
-    } else if (lower.includes('email')) {
-      newColName = 'Corporate Email';
-      formulaPattern = '=LOWER(SUBSTITUTE({nameLetter}{r}, " ", ".")) & "@company.com"';
-      explanation = 'Standard company email address generated from employee name';
-    } else {
-      // Generic new column
-      const quoted = instructions.match(/['"]([^'"]+)['"]/);
-      newColName = quoted ? quoted[1] : 'Computed Metric';
-      formulaPattern = `={salaryLetter}{r} * ${factor}`;
-      explanation = `Calculated metric based on ${newColName}`;
-    }
-
-    onProgress?.(`Injecting new column "${newColName}" with reactive formula into Microsoft Excel...`, 50);
+    onProgress?.(`Injecting ${newColCount} columns (${newHeaders.join(', ')}) across ${dataRowCount} rows in a single 2D SafeArray shot...`, 55);
 
     const scratchDir = path.resolve(process.cwd(), 'scratch');
     if (!fs.existsSync(scratchDir)) fs.mkdirSync(scratchDir, { recursive: true });
-    const psFile = path.join(scratchDir, `continuation_addcol_${Date.now()}.ps1`);
+    const psFile = path.join(scratchDir, `continuation_multicol_${Date.now()}.ps1`);
+    const tsvFile = path.join(scratchDir, `continuation_data_${Date.now()}.tsv`);
+
+    // Write TSV of all rows and all columns
+    const allLines = rows.map((r) => r.map((c) => String(c).replace(/\t/g, ' ')).join('\t')).join('\r\n');
+    fs.writeFileSync(tsvFile, allLines, 'utf8');
 
     const scriptContent = `
 $ErrorActionPreference = 'Stop'
@@ -168,7 +145,7 @@ try {
     $wb = $null
     for ($i = 1; $i -le $excel.Workbooks.Count; $i++) {
         $w = $excel.Workbooks.Item($i)
-        if ($w.FullName -eq $targetPath -or $w.Name -eq [System.IO.Path]::GetFileName($targetPath)) {
+        if ($w.FullName -eq $targetPath -or $w.Name -eq '${session.fileName.replace(/'/g, "''")}' -or $w.Name -eq [System.IO.Path]::GetFileName($targetPath)) {
             $wb = $w
             break
         }
@@ -195,25 +172,18 @@ try {
     }
     $sheet.Activate()
 
-    $usedRange = $sheet.UsedRange
-    $rowCount = $usedRange.Rows.Count
-    $colCount = $usedRange.Columns.Count
+    # 1. Determine TRUE table bounds (Row 1 headers, Column 1 last row)
+    $lastCol = $sheet.Cells.Item(1, $sheet.Columns.Count).End(-4159).Column # xlToLeft
+    if ($lastCol -lt 1) { $lastCol = 1 }
 
-    # Find salary/numeric column letter and name column letter
-    $salaryCol = 6
-    $nameCol = 2
+    $lastRow = $sheet.Cells.Item($sheet.Rows.Count, 1).End(-4162).Row # xlUp
+    if ($lastRow -lt 2) { $lastRow = [Math]::Max($sheet.UsedRange.Rows.Count, 2) }
+    $dataRowCount = $lastRow - 1
 
-    for ($c = 1; $c -le $colCount; $c++) {
-        $headerVal = [string]$sheet.Cells.Item(1, $c).Value2
-        if ($headerVal -match 'salary|rate|price|amount|monthly|total|pay') {
-            $salaryCol = $c
-        }
-        if ($headerVal -match 'name|employee|full name') {
-            $nameCol = $c
-        }
-    }
+    $newColCount = ${newColCount}
+    $newColStart = $lastCol + 1
+    $newColEnd = $lastCol + $newColCount
 
-    # Convert col numbers to Excel letters
     function Get-ExcelColLetter($colNum) {
         $dividend = $colNum
         $colLetter = ''
@@ -224,35 +194,66 @@ try {
         }
         return $colLetter
     }
+    $startColLetter = Get-ExcelColLetter $newColStart
+    $endColLetter = Get-ExcelColLetter $newColEnd
 
-    $salaryLetter = Get-ExcelColLetter $salaryCol
-    $nameLetter = Get-ExcelColLetter $nameCol
+    Emit-Progress "Writing $newColCount columns ($startColLetter to $endColLetter) across $dataRowCount records..." 60
 
-    $newCol = $colCount + 1
-    $newColLetter = Get-ExcelColLetter $newCol
-
-    Emit-Progress "Writing header '${newColName.replace(/'/g, "''")}' at Column $newColLetter..." 60
-
-    # Write header
-    $headerCell = $sheet.Cells.Item(1, $newCol)
-    $headerCell.Value2 = '${newColName.replace(/'/g, "''")}'
-    $headerCell.Font.Bold = $true
-
-    Emit-Progress "Populating formula across $rowCount rows..." 80
-
-    $formulaTemplate = '${formulaPattern.replace(/'/g, "''")}'
-    $formulaTemplate = $formulaTemplate.Replace('{salaryLetter}', $salaryLetter).Replace('{nameLetter}', $nameLetter)
-
-    for ($r = 2; $r -le $rowCount; $r++) {
-        $cellFormula = $formulaTemplate.Replace('{r}', $r.ToString())
-        $sheet.Cells.Item($r, $newCol).Formula = $cellFormula
+    # 2. Prevent overlap: shift any existing chart or shape to the right of the newly injected table block
+    $endColLeft = $sheet.Cells.Item(1, $newColEnd).Left
+    $endColRight = $endColLeft + [Math]::Max($sheet.Cells.Item(1, $newColEnd).Width, 110)
+    foreach ($shp in $sheet.Shapes) {
+        if ($shp.Left -lt ($endColRight + 25)) {
+            $shp.Left = $endColRight + 40
+        }
     }
 
-    $sheet.Columns.AutoFit()
+    # 3. Format header cells
+    $hdrNames = @(${newHeaders.map((h) => `'${h.replace(/'/g, "''")}'`).join(', ')})
+    for ($c = 0; $c -lt $newColCount; $c++) {
+        $colIdx = $newColStart + $c
+        $headerCell = $sheet.Cells.Item(1, $colIdx)
+        $headerCell.Value2 = $hdrNames[$c]
+        $headerCell.Font.Name = "Segoe UI"
+        $headerCell.Font.Bold = $true
+        try {
+            $prevHdr = $sheet.Cells.Item(1, $lastCol)
+            if ($prevHdr.Interior.ColorIndex -ne -4142) {
+                $headerCell.Interior.Color = $prevHdr.Interior.Color
+                $headerCell.Font.Color = $prevHdr.Font.Color
+            }
+        } catch {}
+    }
+
+    Emit-Progress "Injecting 2D SafeArray multi-column data block across $dataRowCount rows..." 80
+
+    # 4. High-Speed 2D SafeArray Data Injection (whole table block at once!)
+    $lines = [System.IO.File]::ReadAllLines('${tsvFile.replace(/'/g, "''")}', [System.Text.Encoding]::UTF8)
+    $tsvRowCount = $lines.Count
+    $arr = New-Object "object[,]" $dataRowCount, $newColCount
+
+    for ($r = 0; $r -lt $dataRowCount; $r++) {
+        $lineIdx = if ($r -lt $tsvRowCount) { $r } else { $r % [Math]::Max(1, $tsvRowCount) }
+        $cols = $lines[$lineIdx].Split("\`t")
+        for ($c = 0; $c -lt $newColCount; $c++) {
+            $val = if ($c -lt $cols.Count) { $cols[$c] } else { '' }
+            $arr[$r, $c] = $val
+        }
+    }
+
+    $dataRange = $sheet.Range($sheet.Cells.Item(2, $newColStart), $sheet.Cells.Item($lastRow, $newColEnd))
+    $dataRange.Value2 = $arr
+
+    # 5. Styling and borders matching dataset
+    $fullBlockRange = $sheet.Range($sheet.Cells.Item(1, $newColStart), $sheet.Cells.Item($lastRow, $newColEnd))
+    $fullBlockRange.Font.Name = "Segoe UI"
+    $fullBlockRange.Borders.LineStyle = 1
+    $fullBlockRange.Columns.AutoFit()
+
     $wb.Save()
 
-    Emit-Progress "Column added and workbook saved successfully." 100
-    Write-Output "ORBIT_RESULT:SUCCESS:$newColLetter:$rowCount"
+    Emit-Progress "Entire table block ($newColCount columns) successfully injected at once with zero overlap." 100
+    Write-Output "ORBIT_RESULT:SUCCESS:$startColLetter-$endColLetter:$lastRow"
 } catch {
     Write-Output "ORBIT_RESULT:ERROR:$($_.Exception.Message)"
 }
@@ -262,34 +263,43 @@ try {
 
     const execResult = await this.runPowerShellScript(psFile, onProgress);
     try { fs.unlinkSync(psFile); } catch {}
+    try { fs.unlinkSync(tsvFile); } catch {}
 
     if (!execResult.success) {
-      throw new Error(execResult.error || 'Failed to add column to workbook.');
+      throw new Error(execResult.error || 'Failed to inject table block to workbook.');
     }
 
     // Update session state
-    const updatedHeaders = [...session.headers, newColName];
+    const updatedHeaders = [...session.headers, ...newHeaders];
     ExcelSessionManager.updateHeaders(updatedHeaders);
 
-    const summaryMarkdown = `**Excel Continuation Task Completed**
+    const summaryMarkdown = `**Excel Table Block Injection Completed**
 
-Successfully added new column **\`${newColName}\`** to the active workbook on screen!
+Successfully created and injected **${newColCount} columns** (\`${newHeaders.join('`, `')}\`) directly into the active workbook in a single backend operation!
 
 - **Target File**: \`${session.filePath}\`
-- **Worksheet**: \`${session.mainSheetName}\`
-- **Formula Injected**: \`${formulaPattern.replace('{salaryLetter}', 'G').replace('{r}', '2')}\` (${explanation})
-- **Rows Processed**: **${session.rowCount} records** updated in real-time
-- **Status**: Live on Microsoft Excel screen & saved to disk.`;
+- **Worksheet**: \`${session.mainSheetName || 'ActiveSheet'}\`
+- **Columns Added**: **${newHeaders.length}** (\`${newHeaders.join(', ')}\`)
+- **Rows Processed**: **${dataRowCount} records** populated simultaneously via 2D SafeArray
+- **Zero-Overlap**: Existing charts automatically shifted to the right of Column \`${String.fromCharCode(65 + session.headers.length + newColCount - 1)}\`
+- **Schema Specification**: ${explanation}
+- **Execution Mode**: Instant 2D Matrix Injection (100% deterministic, 0 cursor drift)
 
-    const logMarkdown = `### Continuation Action: ADD_COLUMN
-- Column Name: ${newColName}
-- Expression: ${explanation}
+| ${newHeaders.join(' | ')} |
+| ${newHeaders.map(() => ':---').join(' | ')} |
+${rows.slice(0, 5).map((r) => `| ${r.join(' | ')} |`).join('\n')}
+${rows.length > 5 ? `| ... (${rows.length - 5} more rows) |` : ''}
+`;
+
+    const logMarkdown = `### Continuation Action: ADD_TABLE_BLOCK
+- Columns: ${newHeaders.join(', ')}
+- Count: ${newColCount}
 - Target: ${session.filePath}
-- Row Count: ${session.rowCount}`;
+- Row Count: ${dataRowCount}`;
 
     return {
       success: true,
-      actionTaken: 'ADD_COLUMN',
+      actionTaken: `Injected ${newColCount} columns: ${newHeaders.join(', ')}`,
       summaryMarkdown,
       logMarkdown,
       filePath: session.filePath,
@@ -300,14 +310,11 @@ Successfully added new column **\`${newColName}\`** to the active workbook on sc
    * Action: Add new row / record to the worksheet
    */
   private async executeAddRow(
-    instructions: string,
+    _instructions: string,
     session: ActiveExcelSession,
     onProgress?: (status: string, percentage: number) => void,
   ): Promise<ContinuationExecutionResult> {
-    onProgress?.('Adding new data row to worksheet...', 50);
-
-    const lower = instructions.toLowerCase();
-    const isSalesDate = lower.includes('date') || lower.includes('sales');
+    onProgress?.('Inspecting active worksheet and preparing new record injection...', 40);
 
     const scratchDir = path.resolve(process.cwd(), 'scratch');
     if (!fs.existsSync(scratchDir)) fs.mkdirSync(scratchDir, { recursive: true });
@@ -328,7 +335,7 @@ try {
 
     $wb = $null
     foreach ($w in $excel.Workbooks) {
-        if ($w.FullName -eq $targetPath -or $w.Name -eq '${session.fileName.replace(/'/g, "''")}') {
+        if ($w.FullName -eq $targetPath -or $w.Name -eq '${session.fileName.replace(/'/g, "''")}' -or $w.Name -eq [System.IO.Path]::GetFileName($targetPath)) {
             $wb = $w
             break
         }
@@ -348,40 +355,74 @@ try {
         $sheet = $wb.Sheets.Item(1)
     }
 
-    $usedRange = $sheet.UsedRange
-    $numRows = $usedRange.Rows.Count
-    $numCols = [Math]::Max($usedRange.Columns.Count, 1)
+    # 1. Determine TRUE table bounds (Row 1 headers, Column 1 last row)
+    $lastCol = $sheet.Cells.Item(1, $sheet.Columns.Count).End(-4159).Column # xlToLeft
+    if ($lastCol -lt 1) { $lastCol = 1 }
 
-    $targetRow = $numRows + 1
-    $today = (Get-Date).ToString("yyyy-MM-dd")
+    $lastRow = $sheet.Cells.Item($sheet.Rows.Count, 1).End(-4162).Row # xlUp
+    if ($lastRow -lt 1) { $lastRow = 1 }
 
-    for ($c = 1; $c -le $numCols; $c++) {
+    $targetRow = $lastRow + 1
+
+    # 2. Check if an Excel Table (ListObject) exists
+    if ($sheet.ListObjects.Count -gt 0) {
+        try {
+            $tbl = $sheet.ListObjects.Item(1)
+            $tblRow = $tbl.ListRows.Add()
+            $targetRow = $tblRow.Range.Row
+            $lastCol = $tbl.ListColumns.Count
+        } catch {}
+    }
+
+    # 3. Build single 2D SafeArray [1, $lastCol] matching column types
+    $rowArr = New-Object "object[,]" 1, $lastCol
+    for ($c = 1; $c -le $lastCol; $c++) {
         $hdr = [string]($sheet.Cells.Item(1, $c).Text).ToLower()
-        if (${isSalesDate ? '$true' : '$false'}) {
-            if ($c -eq 1) {
-                $sheet.Cells.Item($targetRow, $c).Value2 = "Sales Date: $today"
-            } elseif ($hdr -match 'date') {
-                $sheet.Cells.Item($targetRow, $c).Value2 = $today
+        $prevVal = [string]($sheet.Cells.Item($lastRow, $c).Text)
+        
+        if ($hdr -match 'id\b|#|code') {
+            if ($prevVal -match '^([A-Za-z_-]+)(\d+)$') {
+                $pfx = $Matches[1]
+                $num = [int]$Matches[2] + 1
+                $rowArr[0, $c - 1] = "$pfx$([string]$num.PadLeft($Matches[2].Length, '0'))"
             } else {
-                $dateVal = (Get-Date).AddDays($c - 1).ToString("yyyy-MM-dd")
-                $sheet.Cells.Item($targetRow, $c).Value2 = $dateVal
+                $rowArr[0, $c - 1] = [string]($targetRow - 1)
+            }
+        } elseif ($hdr -match 'date|time|day') {
+            $rowArr[0, $c - 1] = (Get-Date).ToString("yyyy-MM-dd")
+        } elseif ($hdr -match 'founder|entrepreneur|name|employee|person|customer|client') {
+            $rowArr[0, $c - 1] = "Aarav Sharma"
+        } elseif ($hdr -match 'business|company|startup|firm|store|shop') {
+            $rowArr[0, $c - 1] = "Apex Technologies"
+        } elseif ($hdr -match 'industry|domain|category|sector|dept|department') {
+            $rowArr[0, $c - 1] = if ($prevVal) { $prevVal } else { "Artificial Intelligence" }
+        } elseif ($hdr -match 'contact|phone|mobile|cell|tel') {
+            $rowArr[0, $c - 1] = "+1-555-0188"
+        } elseif ($hdr -match 'email|mail') {
+            $rowArr[0, $c - 1] = "contact@apextechnologies.com"
+        } elseif ($hdr -match 'location|city|country|address|region') {
+            $rowArr[0, $c - 1] = "San Francisco, CA"
+        } elseif ($hdr -match 'status|state') {
+            $rowArr[0, $c - 1] = "Active"
+        } elseif ($hdr -match 'revenue|salary|price|amount|cost|total|pay|value|sales') {
+            $prevFormula = [string]($sheet.Cells.Item($lastRow, $c).Formula)
+            if ($prevFormula.StartsWith("=")) {
+                $formulaTemplate = $prevFormula -replace "\b$($lastRow)\b", [string]$targetRow
+                $rowArr[0, $c - 1] = $formulaTemplate
+            } else {
+                $rowArr[0, $c - 1] = 75000.00
             }
         } else {
-            if ($hdr -match 'id') {
-                $sheet.Cells.Item($targetRow, $c).Value2 = [string]($numRows)
-            } elseif ($hdr -match 'date') {
-                $sheet.Cells.Item($targetRow, $c).Value2 = $today
-            } elseif ($hdr -match 'name') {
-                $sheet.Cells.Item($targetRow, $c).Value2 = "New Record"
-            } else {
-                $sheet.Cells.Item($targetRow, $c).Value2 = "---"
-            }
+            $rowArr[0, $c - 1] = "New Entry"
         }
     }
 
-    $rowRange = $sheet.Range($sheet.Cells.Item($targetRow, 1), $sheet.Cells.Item($targetRow, $numCols))
-    $rowRange.Font.Name = "Segoe UI"
-    $rowRange.Font.Size = 10
+    # 4. SafeArray injection in 1 shot
+    $range = $sheet.Range($sheet.Cells.Item($targetRow, 1), $sheet.Cells.Item($targetRow, $lastCol))
+    $range.Value2 = $rowArr
+    $range.Font.Name = "Segoe UI"
+    $range.Font.Size = 10
+    $range.Borders.LineStyle = 1
 
     try {
         $wscript = New-Object -ComObject WScript.Shell
@@ -408,7 +449,7 @@ try {
     const summaryMarkdown = `**Excel Row Added Successfully**
 
 Successfully inserted new row into active workbook **\`${session.fileName}\`**!
-- **Action**: Insert Row (${isSalesDate ? 'Sales Dates' : 'Data Record'})
+- **Action**: Insert Row (Clean Zero-Overlap SafeArray)
 - **Target Sheet**: \`${session.mainSheetName || 'ActiveSheet'}\`
 - **Updated Row Count**: ${session.rowCount + 1} rows
 - **Status**: Updated live on Microsoft Excel & saved to disk.`;
@@ -833,10 +874,14 @@ try {
         $sheet = $wb.Sheets.Item(1)
     }
 
-    # Inspect used range
-    $usedRange = $sheet.UsedRange
-    $numRows = [Math]::Min($usedRange.Rows.Count, 300)
-    $numCols = [Math]::Min($usedRange.Columns.Count, 25)
+    # 1. Determine TRUE table bounds (Row 1 headers, Column 1 last row)
+    $lastCol = $sheet.Cells.Item(1, $sheet.Columns.Count).End(-4159).Column # xlToLeft
+    if ($lastCol -lt 1) { $lastCol = [Math]::Min($sheet.UsedRange.Columns.Count, 25) }
+
+    $lastRow = $sheet.Cells.Item($sheet.Rows.Count, 1).End(-4162).Row # xlUp
+    if ($lastRow -lt 2) { $lastRow = [Math]::Min($sheet.UsedRange.Rows.Count, 300) }
+    $numRows = $lastRow
+    $numCols = $lastCol
 
     if ($numRows -lt 2) {
         throw "Worksheet does not contain enough data rows to generate a chart."
@@ -848,10 +893,10 @@ try {
 
     for ($c = 1; $c -le $numCols; $c++) {
         $hdr = [string]($sheet.Cells.Item(1, $c).Text).ToLower()
-        if ($hdr -match 'subject|department|dept|name|item|category|role|title') {
+        if ($hdr -match 'subject|department|dept|name|item|category|role|title|industry|domain') {
             $catCol = $c
         }
-        if ($hdr -match 'mark|score|grade|salary|rate|attendance|count|total|value|amt') {
+        if ($hdr -match 'mark|score|grade|salary|rate|attendance|count|total|value|amt|revenue') {
             $valCol = $c
         }
     }
@@ -860,8 +905,8 @@ try {
         if ($catCol -gt 1) { $catCol = 1 } else { $valCol = 2 }
     }
 
-    # Calculate positioning (to the right of existing data)
-    $chartLeft = $sheet.Cells.Item(2, [Math]::Max($numCols + 2, 7)).Left
+    # Calculate positioning (to the right of existing data with clean margin)
+    $chartLeft = $sheet.Cells.Item(2, $numCols).Left + $sheet.Cells.Item(2, $numCols).Width + 30
     if ($chartLeft -le 0) { $chartLeft = 520 }
     $chartTop = 20
     $chartWidth = 520

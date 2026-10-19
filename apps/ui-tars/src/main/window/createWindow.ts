@@ -82,7 +82,6 @@ export function createWindow({
         icon: !winIcon.isEmpty() ? winIcon : icon,
         autoHideMenuBar: true,
         frame: true,
-        backgroundMaterial: 'mica',
         resizable: true,
         maximizable: true,
       };

@@ -49,8 +49,11 @@ export class UniversalDatasetPlanner {
     const lower = instructions.toLowerCase();
     const rand = createPrng(Date.now() % 100000 + 42);
 
-    // 1. Extract row count if specified
-    const countMatch = instructions.match(/(\d+)\s*(?:rows?|employees?|records?|items?|entries?|products?|students?|transactions?|coins?)/i);
+    // 1. Extract row count if specified (e.g. "200 entrepreneur", "data of 200", "50 rows")
+    const countMatch =
+      instructions.match(/(?:data\s+of|make|create|generate|add|with)\s+(\d+)\b/i) ||
+      instructions.match(/(\d+)\s*(?:rows?|employees?|records?|items?|entries?|products?|students?|transactions?|coins?|entrepreneurs?|startups?|companies|users?|people|leads?|clients?)/i) ||
+      instructions.match(/\b(\d+)\s+[a-zA-Z]+/i);
     let rowCount = countMatch ? parseInt(countMatch[1], 10) : 0;
     if (!rowCount || rowCount <= 0) {
       if (lower.includes('large') || lower.includes('big')) rowCount = 500;
@@ -67,6 +70,15 @@ export class UniversalDatasetPlanner {
     }
 
     // 3. Detect Domain / Intent
+    if (
+      lower.includes('entrepreneur') ||
+      lower.includes('startup') ||
+      lower.includes('founder') ||
+      (lower.includes('business') && !lower.includes('budget'))
+    ) {
+      return this.planEntrepreneurs(rowCount, customFileName, rand);
+    }
+
     if (
       lower.includes('sale') ||
       lower.includes('revenue') ||
@@ -85,9 +97,10 @@ export class UniversalDatasetPlanner {
       lower.includes('university') ||
       lower.includes('marks') ||
       lower.includes('grade') ||
-      lower.includes('exam')
+      lower.includes('exam') ||
+      lower.includes('class')
     ) {
-      return this.planStudents(rowCount, customFileName, rand);
+      return this.planStudents(rowCount, customFileName, rand, lower);
     }
 
     if (
@@ -202,7 +215,56 @@ export class UniversalDatasetPlanner {
     };
   }
 
-  private planStudents(rowCount: number, fileName: string | null, rand: () => number): UniversalExcelPlan {
+  private planStudents(rowCount: number, fileName: string | null, rand: () => number, lowerPrompt: string = ''): UniversalExcelPlan {
+    const isExamMarks = lowerPrompt.includes('mark') || lowerPrompt.includes('exam') || lowerPrompt.includes('subject');
+
+    if (isExamMarks) {
+      const subjects = ['Mathematics', 'Physics', 'Chemistry', 'English', 'Computer Science', 'Biology'];
+      const maxMark = lowerPrompt.includes('out of 80') || lowerPrompt.includes('80') ? 80 : 100;
+      const headers = ['Roll Number', 'Student Name', ...subjects, `Total Marks (/${subjects.length * maxMark})`, 'Percentage (%)', 'Grade'];
+      const rows: (string | number)[][] = [];
+
+      for (let i = 1; i <= rowCount; i++) {
+        // 7-digit roll number e.g. 2401001
+        const rollNumber = 2400000 + i;
+        const name = `${FIRST_NAMES[i % FIRST_NAMES.length]} ${LAST_NAMES[(i * 5) % LAST_NAMES.length]}`;
+        const marks = subjects.map(() => Math.floor((maxMark * 0.45) + rand() * (maxMark * 0.53)));
+        const total = marks.reduce((a, b) => a + b, 0);
+        const pct = parseFloat(((total / (subjects.length * maxMark)) * 100).toFixed(1));
+        const grade = pct >= 90 ? 'A+' : pct >= 80 ? 'A' : pct >= 70 ? 'B+' : pct >= 60 ? 'B' : pct >= 50 ? 'C' : 'D';
+        rows.push([rollNumber, name, ...marks, total, pct, grade]);
+      }
+
+      const summaryHeaders = ['Subject', 'Class Average (/80)', 'Highest Mark', 'Lowest Mark'];
+      const summaryRows: (string | number)[][] = [];
+      const colLetters = ['C', 'D', 'E', 'F', 'G', 'H'];
+      subjects.forEach((subj, idx) => {
+        const col = colLetters[idx];
+        summaryRows.push([
+          subj,
+          `=ROUND(AVERAGE(ExaminationMarks!${col}2:${col}${rowCount + 1}), 1)`,
+          `=MAX(ExaminationMarks!${col}2:${col}${rowCount + 1})`,
+          `=MIN(ExaminationMarks!${col}2:${col}${rowCount + 1})`
+        ]);
+      });
+
+      return {
+        fileName: fileName || 'student_examination_marks.xlsx',
+        mainSheetName: 'ExaminationMarks',
+        headers,
+        rows,
+        summarySheetName: 'SubjectPerformance',
+        summaryHeaders,
+        summaryRows,
+        categories: subjects,
+        categoryColumnLetter: 'A',
+        numericColumnLetter: 'B',
+        chartTitle: 'Class Average Marks by Subject (/80)',
+        chartType: 'ColumnClustered',
+        domainName: 'Student Examination Marks'
+      };
+    }
+
     const departments = ['Computer Science', 'Mechanical Engineering', 'Electrical Engineering', 'Business Administration', 'Data Science', 'Biotechnology'];
     const headers = ['Student ID', 'Student Name', 'Department', 'Attendance (%)', 'Assignments Score', 'Midterm Score', 'Final Grade (%)'];
     const rows: (string | number)[][] = [];
@@ -540,6 +602,67 @@ export class UniversalDatasetPlanner {
       chartTitle: 'Headcount by Department',
       chartType: 'ColumnClustered',
       domainName
+    };
+  }
+
+  private planEntrepreneurs(rowCount: number, fileName: string | null, rand: () => number): UniversalExcelPlan {
+    const domains = [
+      'Artificial Intelligence', 'FinTech & Payments', 'CleanTech & Energy', 'E-Commerce & Retail',
+      'HealthTech & Biotech', 'EdTech & Learning', 'CyberSecurity', 'SaaS & Cloud Software',
+      'Logistics & Supply Chain', 'Robotics & Automation'
+    ];
+    const cities = [
+      'San Francisco, CA', 'New York, NY', 'Austin, TX', 'Seattle, WA', 'London, UK',
+      'Bengaluru, India', 'Singapore', 'Berlin, Germany', 'Toronto, Canada', 'Boston, MA'
+    ];
+    const companyPrefixes = ['Apex', 'Nova', 'Cyber', 'Quantum', 'Cloud', 'Zenith', 'Omni', 'Hyper', 'Pulse', 'Vector', 'Alpha', 'Synapse'];
+    const companySuffixes = ['Technologies', 'Labs', 'Solutions', 'Ventures', 'Systems', 'AI', 'Networks', 'Dynamics', 'Scale', 'Hub'];
+
+    const headers = ['Entrepreneur ID', 'Founder Name', 'Business Name', 'Industry Domain', 'Contact Number', 'Email Address', 'Location', 'Annual Revenue ($)'];
+    const rows: (string | number)[][] = [];
+
+    for (let i = 1; i <= rowCount; i++) {
+      const id = `ENT-${String(i).padStart(4, '0')}`;
+      const fName = FIRST_NAMES[i % FIRST_NAMES.length];
+      const lName = LAST_NAMES[(i * 3) % LAST_NAMES.length];
+      const fullName = `${fName} ${lName}`;
+      const domain = domains[Math.floor(rand() * domains.length)];
+      const prefix = companyPrefixes[Math.floor(rand() * companyPrefixes.length)];
+      const suffix = companySuffixes[Math.floor(rand() * companySuffixes.length)];
+      const businessName = `${prefix} ${suffix}`;
+      const contactNum = `+1-555-${String(1000 + ((i * 37) % 9000)).padStart(4, '0')}`;
+      const email = `${fName.toLowerCase()}.${lName.toLowerCase()}@${prefix.toLowerCase()}${suffix.toLowerCase()}.com`;
+      const location = cities[Math.floor(rand() * cities.length)];
+      const revenue = parseFloat((250000 + rand() * 4750000).toFixed(2));
+
+      rows.push([id, fullName, businessName, domain, contactNum, email, location, revenue]);
+    }
+
+    const summaryHeaders = ['Industry Domain', 'Founder Count', 'Total Revenue ($)', 'Average Revenue ($)'];
+    const summaryRows: (string | number)[][] = [];
+    for (const d of domains) {
+      summaryRows.push([
+        d,
+        `=COUNTIF(EntrepreneurDirectory!D2:D${rowCount + 1}, "${d}")`,
+        `=SUMIF(EntrepreneurDirectory!D2:D${rowCount + 1}, "${d}", EntrepreneurDirectory!H2:H${rowCount + 1})`,
+        `=AVERAGEIF(EntrepreneurDirectory!D2:D${rowCount + 1}, "${d}", EntrepreneurDirectory!H2:H${rowCount + 1})`
+      ]);
+    }
+
+    return {
+      fileName: fileName || 'entrepreneur_directory.xlsx',
+      mainSheetName: 'EntrepreneurDirectory',
+      headers,
+      rows,
+      summarySheetName: 'DomainSummary',
+      summaryHeaders,
+      summaryRows,
+      categories: domains,
+      categoryColumnLetter: 'D',
+      numericColumnLetter: 'H',
+      chartTitle: 'Entrepreneurs by Industry Domain',
+      chartType: 'ColumnClustered',
+      domainName: 'Entrepreneur & Business Directory'
     };
   }
 

@@ -190,15 +190,19 @@ export async function runExcelTask(
 }> {
   logger.info('[excelChatRouter] Executing autonomous Excel task for instructions:', instructions);
 
-  const lower = instructions.toLowerCase();
   const activeSession = ExcelSessionManager.getActiveSession();
 
-  // Check if this is a continuation on the active session
-  const isExplicitNewCreation =
-    (lower.includes('create a new') || lower.includes('create new') || lower.includes('fresh') || lower.includes('open new')) &&
-    (lower.includes('sheet') || lower.includes('excel') || lower.includes('workbook') || lower.includes('file'));
+  // A task is a NEW DATASET CREATION task if it asks to make/create/generate a dataset, sheet, workbook, table, or records
+  const isNewCreation =
+    /\b(open excel and (make|create|generate|build)|make\s+a\s+data|make\s+data|create\s+data|generate\s+data|make\s+a\s+dummy|make\s+dummy|create\s+a\s+sheet|create\s+sheet|make\s+a\s+sheet|make\s+sheet|make\s+a\s+table|create\s+a\s+table|new\s+sheet|new\s+workbook|fresh\s+sheet|create\s+a\s+new|create\s+new)\b/i.test(instructions) ||
+    (/\b(make|create|generate|build)\b/i.test(instructions) && /\b(students?|employees?|entrepreneurs?|products?|sales|records?|dataset|directory|roster|marks?)\b/i.test(instructions) && !/\b(now|ab isme|also|add a|insert a)\b/i.test(instructions));
 
-  if (activeSession && !isExplicitNewCreation) {
+  // A task is a CONTINUATION task if it specifies an incremental operation on existing active data
+  const isContinuationAction =
+    /\b(add a column|add column|insert column|add a row|add row|insert row|add record|add entry|pie chart|bar chart|column chart|line chart|make a chart|make chart|create chart|sort by|sort data|clean data|deduplicate|calculate\s+(average|total|sum|max|min))\b/i.test(instructions) ||
+    /\b(now|ab isme|also|isme)\b/i.test(instructions);
+
+  if (activeSession && !isNewCreation && isContinuationAction) {
     logger.info(`[excelChatRouter] Routing to ExcelContinuationEngine on active workbook: ${activeSession.filePath}`);
     try {
       const continuationEngine = new ExcelContinuationEngine();
