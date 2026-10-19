@@ -175,11 +175,19 @@ try {
     }
 
     if ($null -eq $wb) {
-        $wb = $excel.Workbooks.Open($targetPath)
+        if ($excel.ActiveWorkbook) {
+            $wb = $excel.ActiveWorkbook
+        } elseif ([System.IO.File]::Exists($targetPath)) {
+            $wb = $excel.Workbooks.Open($targetPath)
+        } else {
+            throw "Workbook not found at $targetPath"
+        }
     }
 
-    $wscript = New-Object -ComObject WScript.Shell
-    $wscript.AppActivate($excel.Caption)
+    try {
+        $wscript = New-Object -ComObject WScript.Shell
+        $wscript.AppActivate($excel.Caption)
+    } catch {}
 
     $sheet = $wb.ActiveSheet
     if ($sheet -eq $null) {
@@ -441,18 +449,32 @@ function Emit-Progress($msg, $pct) {
 try {
     Emit-Progress "Connecting to Microsoft Excel..." 30
     $targetPath = '${session.filePath.replace(/'/g, "''")}'
-    $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+    $excel = $null
+    try {
+        $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+    } catch {
+        $excel = New-Object -ComObject Excel.Application
+    }
     $excel.Visible = $true
+    $excel.DisplayAlerts = $false
 
     $wb = $null
     for ($i = 1; $i -le $excel.Workbooks.Count; $i++) {
         $w = $excel.Workbooks.Item($i)
-        if ($w.FullName -eq $targetPath -or $w.Name -eq [System.IO.Path]::GetFileName($targetPath)) {
+        if ($w.FullName -eq $targetPath -or $w.Name -eq '${session.fileName.replace(/'/g, "''")}' -or $w.Name -eq [System.IO.Path]::GetFileName($targetPath)) {
             $wb = $w
             break
         }
     }
-    if ($null -eq $wb) { $wb = $excel.Workbooks.Open($targetPath) }
+    if ($null -eq $wb) {
+        if ($excel.ActiveWorkbook) {
+            $wb = $excel.ActiveWorkbook
+        } elseif ([System.IO.File]::Exists($targetPath)) {
+            $wb = $excel.Workbooks.Open($targetPath)
+        } else {
+            throw "Workbook not found at $targetPath"
+        }
+    }
 
     $sheet = $wb.ActiveSheet
     if ($sheet -eq $null) {
@@ -538,10 +560,31 @@ function Emit-Progress($msg, $pct) {
 try {
     Emit-Progress "Connecting to Excel..." 20
     $targetPath = '${session.filePath.replace(/'/g, "''")}'
-    $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+    $excel = $null
+    try {
+        $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+    } catch {
+        $excel = New-Object -ComObject Excel.Application
+    }
     $excel.Visible = $true
+    $excel.DisplayAlerts = $false
 
-    $wb = $excel.Workbooks.Open($targetPath)
+    $wb = $null
+    foreach ($w in $excel.Workbooks) {
+        if ($w.FullName -eq $targetPath -or $w.Name -eq '${session.fileName.replace(/'/g, "''")}' -or $w.Name -eq [System.IO.Path]::GetFileName($targetPath)) {
+            $wb = $w
+            break
+        }
+    }
+    if ($null -eq $wb) {
+        if ($excel.ActiveWorkbook) {
+            $wb = $excel.ActiveWorkbook
+        } elseif ([System.IO.File]::Exists($targetPath)) {
+            $wb = $excel.Workbooks.Open($targetPath)
+        } else {
+            throw "Workbook not found at $targetPath"
+        }
+    }
     $sheet = $wb.ActiveSheet
     if ($sheet -eq $null) {
         $sheet = $wb.Sheets.Item(1)
@@ -615,8 +658,31 @@ Normalized and cleaned records across all **${session.rowCount} rows** in **\`${
 $ErrorActionPreference = 'Stop'
 try {
     $targetPath = '${session.filePath.replace(/'/g, "''")}'
-    $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
-    $wb = $excel.Workbooks.Open($targetPath)
+    $excel = $null
+    try {
+        $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+    } catch {
+        $excel = New-Object -ComObject Excel.Application
+    }
+    $excel.Visible = $true
+    $excel.DisplayAlerts = $false
+
+    $wb = $null
+    foreach ($w in $excel.Workbooks) {
+        if ($w.FullName -eq $targetPath -or $w.Name -eq '${session.fileName.replace(/'/g, "''")}' -or $w.Name -eq [System.IO.Path]::GetFileName($targetPath)) {
+            $wb = $w
+            break
+        }
+    }
+    if ($null -eq $wb) {
+        if ($excel.ActiveWorkbook) {
+            $wb = $excel.ActiveWorkbook
+        } elseif ([System.IO.File]::Exists($targetPath)) {
+            $wb = $excel.Workbooks.Open($targetPath)
+        } else {
+            throw "Workbook not found at $targetPath"
+        }
+    }
     $sheet = $wb.ActiveSheet
     if ($sheet -eq $null) {
         $sheet = $wb.Sheets.Item(1)
