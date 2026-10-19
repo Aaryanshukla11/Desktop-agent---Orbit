@@ -17,20 +17,17 @@ import {
   RemoteComputerOperator,
 } from '../remote/operators';
 import {
-  DefaultBrowserOperator,
   RemoteBrowserOperator,
 } from '@UI-TARs/operator-browser';
 import { showPredictionMarker } from '@main/window/ScreenMarker';
 import { SettingStore } from '@main/store/setting';
 import { AppState, Operator, VLMProviderV2 } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
-import { checkBrowserAvailability } from './browserCheck';
 import {
   getModelVersion,
   getSpByModelVersion,
   beforeAgentRun,
   afterAgentRun,
-  getLocalBrowserSearchEngine,
 } from '../utils/agent';
 import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
@@ -39,6 +36,7 @@ import { UITarsModelConfig } from '@UI-TARs/sdk/core';
 import { OrbitExperienceEngine } from './experienceEngine';
 import { OrbitMacroEngine } from './macroEngine';
 import { isExcelTask, runExcelTask } from '../specialists/excel/excelChatRouter';
+import { isBrowserTask, runBrowserTask } from '../specialists/browser/browserChatRouter';
 import { Tier1Interceptor } from './tier1Interceptor';
 import { CheckpointVerifier } from './checkpointVerifier';
 import { fastInput } from '../utils/fastInput';
@@ -185,6 +183,94 @@ export const runAgent = async (
         afterAgentRun(settings.operator);
       }
     }
+
+  // Autonomous Playwright Browser Specialist Interceptor (Card 2: Browser Operator)
+  if (settings.operator === Operator.LocalBrowser || (settings.operator !== Operator.LocalComputer && isBrowserTask(instructions))) {
+    logger.info('[runAgent] 🌐 Routing to Playwright Browser Specialist Engine!');
+    await beforeAgentRun(settings.operator);
+
+    try {
+      const browserRes = await runBrowserTask(instructions, (statusMsg, pct) => {
+        logger.info(`[runAgent] Browser Specialist progress: ${statusMsg} (${pct}%)`);
+        const progressMessage = {
+          from: 'assistant',
+          value: statusMsg,
+          predictionParsed: [
+            {
+              action_type: 'thought',
+              action_inputs: {
+                content: statusMsg,
+              },
+            },
+          ],
+        };
+        setState({
+          ...getState(),
+          thinking: true,
+          messages: [...(getState().messages || []), progressMessage as any],
+        });
+      });
+
+      if (browserRes.success) {
+        logger.info('[runAgent] ✅ Browser Specialist completed successfully!');
+        await runTracker.finish(true, 'BROWSER_SPECIALIST_SUCCESS');
+
+        const successMessage = {
+          from: 'assistant',
+          value: browserRes.summaryMarkdown,
+          predictionParsed: [
+            {
+              action_type: 'finished',
+              action_inputs: {
+                content: browserRes.summaryMarkdown,
+              },
+            },
+          ],
+        };
+
+        setState({
+          ...getState(),
+          status: StatusEnum.END,
+          thinking: false,
+          messages: [...(getState().messages || []), successMessage as any],
+        });
+        return;
+      } else {
+        logger.warn('[runAgent] Browser Specialist encountered issue:', browserRes.summaryMarkdown);
+        await runTracker.finish(false, 'BROWSER_SPECIALIST_FAILED');
+        const failureMessage = {
+          from: 'assistant',
+          value: browserRes.summaryMarkdown,
+          predictionParsed: [
+            {
+              action_type: 'finished',
+              action_inputs: {
+                content: browserRes.summaryMarkdown,
+              },
+            },
+          ],
+        };
+        setState({
+          ...getState(),
+          status: StatusEnum.END,
+          errorMsg: browserRes.error || browserRes.summaryMarkdown,
+          messages: [...(getState().messages || []), failureMessage as any],
+        });
+        return;
+      }
+    } catch (err: any) {
+      logger.error('[runAgent] Browser Specialist execution error:', err);
+      await runTracker.finish(false, 'BROWSER_SPECIALIST_ERROR');
+      setState({
+        ...getState(),
+        status: StatusEnum.END,
+        errorMsg: err?.message || String(err),
+      });
+      return;
+    } finally {
+      afterAgentRun(settings.operator);
+    }
+  }
 
   // Tier-1 Fast-Path Interceptor: Before invoking vlm.predict() with a 2,000-token screenshot,
   // test if the element exists in the current foreground window's UIA tree. If yes, fire instant native click.
@@ -446,7 +532,6 @@ export const runAgent = async (
   let operatorType: 'computer' | 'browser' = 'computer';
   let operator:
     | NutJSElectronOperator
-    | DefaultBrowserOperator
     | RemoteComputerOperator
     | RemoteBrowserOperator;
 
@@ -454,28 +539,6 @@ export const runAgent = async (
     case Operator.LocalComputer:
       operator = new NutJSElectronOperator();
       operatorType = 'computer';
-      break;
-    case Operator.LocalBrowser:
-      await checkBrowserAvailability();
-      const { browserAvailable } = getState();
-      if (!browserAvailable) {
-        setState({
-          ...getState(),
-          status: StatusEnum.ERROR,
-          errorMsg:
-            'Browser is not available. Please install Chrome and try again.',
-        });
-        return;
-      }
-
-      operator = await DefaultBrowserOperator.getInstance(
-        false,
-        false,
-        false,
-        getState().status === StatusEnum.CALL_USER,
-        getLocalBrowserSearchEngine(settings.searchEngineForBrowser),
-      );
-      operatorType = 'browser';
       break;
     case Operator.RemoteComputer:
       operator = await RemoteComputerOperator.create();

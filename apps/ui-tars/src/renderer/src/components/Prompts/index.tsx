@@ -2,7 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@renderer/components/ui/button';
 
-const MotionButton = motion(Button);
+const MotionButton = (motion.create || motion)(Button);
 
 interface SuggestionProps {
   suggestions: string[];

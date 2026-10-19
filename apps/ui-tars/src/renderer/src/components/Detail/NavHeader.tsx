@@ -15,7 +15,7 @@ export function NavHeader({ title, onBack, docUrl, children }: HeaderProps) {
         variant="ghost"
         size="sm"
         className="!pl-0"
-        style={{ '-webkit-app-region': 'no-drag' }}
+        style={{ WebkitAppRegion: 'no-drag' }}
         onClick={onBack}
       >
         <ChevronLeft strokeWidth={2} className="!h-5 !w-5" />
@@ -29,7 +29,7 @@ export function NavHeader({ title, onBack, docUrl, children }: HeaderProps) {
           variant="outline"
           className="size-8"
           size="sm"
-          style={{ '-webkit-app-region': 'no-drag' }}
+          style={{ WebkitAppRegion: 'no-drag' }}
           onClick={() => window.open(docUrl, '_blank')}
         >
           <FileText strokeWidth={2} />
