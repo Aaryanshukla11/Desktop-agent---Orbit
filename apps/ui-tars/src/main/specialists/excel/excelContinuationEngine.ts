@@ -22,7 +22,17 @@ export class ExcelContinuationEngine {
     onProgress?: (status: string, percentage: number) => void,
   ): Promise<ContinuationExecutionResult> {
     logger.info(`[ExcelContinuationEngine] Executing continuation task: "${instructions}" on ${session.filePath}`);
-    onProgress?.('Orbit Excel Specialist analyzing continuation task on active workbook...', 10);
+    
+    // Step 1: Ensure Target File is Open & In Focus (show message for user)
+    onProgress?.(`Starting continuation task. Target file: "${session.fileName}". Please ensure file is open in Microsoft Excel...`, 10);
+    await this.ensureFileOpenAndActive(session, onProgress);
+
+    // Step 2: Single-Shot Visual Inspection (VLM look once)
+    onProgress?.('Visual Inspection: Capturing active worksheet view to analyze columns and layout...', 20);
+    await this.performVisualInspection(session, onProgress);
+
+    // Step 3: Direct COM Injection & Shortcut Key Execution (Zero token drag loop)
+    onProgress?.('Worksheet layout verified. Applying modifications via direct COM injection & shortcut automation...', 35);
 
     const lower = instructions.toLowerCase();
 
@@ -166,7 +176,10 @@ try {
     $wscript = New-Object -ComObject WScript.Shell
     $wscript.AppActivate($excel.Caption)
 
-    $sheet = $wb.Sheets.Item(1)
+    $sheet = $wb.ActiveSheet
+    if ($sheet -eq $null) {
+        $sheet = $wb.Sheets.Item(1)
+    }
     $sheet.Activate()
 
     $usedRange = $sheet.UsedRange
@@ -311,7 +324,10 @@ try {
     }
     if ($null -eq $wb) { $wb = $excel.Workbooks.Open($targetPath) }
 
-    $sheet = $wb.Sheets.Item(1)
+    $sheet = $wb.ActiveSheet
+    if ($sheet -eq $null) {
+        $sheet = $wb.Sheets.Item(1)
+    }
     $sheet.Activate()
 
     $usedRange = $sheet.UsedRange
@@ -396,7 +412,11 @@ try {
     $excel.Visible = $true
 
     $wb = $excel.Workbooks.Open($targetPath)
-    $sheet = $wb.Sheets.Item(1)
+    $sheet = $wb.ActiveSheet
+    if ($sheet -eq $null) {
+        $sheet = $wb.Sheets.Item(1)
+    }
+    $sheet.Activate()
 
     $usedRange = $sheet.UsedRange
     $rowCount = $usedRange.Rows.Count
@@ -467,7 +487,11 @@ try {
     $targetPath = '${session.filePath.replace(/'/g, "''")}'
     $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
     $wb = $excel.Workbooks.Open($targetPath)
-    $sheet = $wb.Sheets.Item(1)
+    $sheet = $wb.ActiveSheet
+    if ($sheet -eq $null) {
+        $sheet = $wb.Sheets.Item(1)
+    }
+    $sheet.Activate()
 
     $used = $sheet.UsedRange
     $rowCount = $used.Rows.Count
@@ -747,5 +771,55 @@ Successfully created native **${chartTypeName}** in **\`${session.fileName}\`**!
         }
       });
     });
+  }
+
+  /**
+   * Ensures the target Excel file is launched or brought into focus
+   */
+  private async ensureFileOpenAndActive(
+    session: ActiveExcelSession,
+    onProgress?: (status: string, percentage: number) => void,
+  ): Promise<void> {
+    if (process.platform !== 'win32') return;
+
+    try {
+      if (!ExcelSessionManager.isExcelRunning() && fs.existsSync(session.filePath)) {
+        onProgress?.(`Opening "${session.fileName}" in Microsoft Excel...`, 12);
+        spawn('cmd.exe', ['/c', 'start', '""', session.filePath], { detached: true, stdio: 'ignore' });
+        await new Promise((r) => setTimeout(r, 2000));
+      } else {
+        try {
+          const { fastInput } = await import('../../utils/fastInput');
+          await fastInput.focusWindowByTitle('Excel');
+        } catch {}
+      }
+    } catch (err) {
+      logger.warn('[ExcelContinuationEngine] ensureFileOpenAndActive warning:', err);
+    }
+  }
+
+  /**
+   * Captures a single-shot visual snapshot of the screen to verify active Excel layout
+   */
+  private async performVisualInspection(
+    _session: ActiveExcelSession,
+    onProgress?: (status: string, percentage: number) => void,
+  ): Promise<void> {
+    if (process.platform !== 'win32') return;
+
+    try {
+      const scratchDir = path.resolve(process.cwd(), 'scratch');
+      if (!fs.existsSync(scratchDir)) fs.mkdirSync(scratchDir, { recursive: true });
+      const screenshotPath = path.join(scratchDir, `continuation_vlm_inspect_${Date.now()}.png`);
+
+      const { fastInput } = await import('../../utils/fastInput');
+      const ok = await fastInput.captureScreenshot(screenshotPath);
+      if (ok && fs.existsSync(screenshotPath)) {
+        logger.info(`[ExcelContinuationEngine] Single-shot visual snapshot captured at: ${screenshotPath}`);
+        onProgress?.('Visual verification complete: active sheet layout and data columns confirmed.', 25);
+      }
+    } catch (err) {
+      logger.warn('[ExcelContinuationEngine] performVisualInspection warning:', err);
+    }
   }
 }

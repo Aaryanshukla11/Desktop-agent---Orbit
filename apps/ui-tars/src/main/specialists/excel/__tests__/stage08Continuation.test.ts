@@ -7,6 +7,20 @@ vi.mock('electron', () => ({
   BrowserWindow: vi.fn(),
   dialog: vi.fn(),
   shell: vi.fn(),
+  screen: {
+    getPrimaryDisplay: () => ({ scaleFactor: 1, bounds: { width: 1920, height: 1080 } }),
+  },
+}));
+
+vi.mock('../../utils/fastInput', () => ({
+  fastInput: {
+    captureScreenshot: vi.fn().mockResolvedValue(true),
+    focusWindowByTitle: vi.fn().mockResolvedValue(true),
+    hotkey: vi.fn().mockResolvedValue(true),
+  },
+  FastInputManager: {
+    getInstance: vi.fn(),
+  },
 }));
 
 vi.mock('electron-updater', () => ({
