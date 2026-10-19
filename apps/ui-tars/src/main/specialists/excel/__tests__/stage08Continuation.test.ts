@@ -37,19 +37,29 @@ describe('Stage 08: Multi-Turn Excel Continuation & Conversational Context', () 
     fs.writeFileSync(dummyFilePath, 'dummy excel content', 'utf8');
 
     ExcelSessionManager.autoDiscoveryEnabled = false;
+    ExcelSessionManager.mockExcelRunning = false;
     ExcelSessionManager.clearActiveSession();
   });
 
   afterEach(() => {
     ExcelSessionManager.clearActiveSession();
     ExcelSessionManager.autoDiscoveryEnabled = true;
+    ExcelSessionManager.mockExcelRunning = null;
     try { fs.unlinkSync(dummyFilePath); } catch {}
   });
 
   it('correctly rejects follow-up without active session or excel keywords', () => {
-    // When no active session exists, vague continuation without excel should return false
+    // When no active session exists and excel is not running, vague continuation without excel should return false
     expect(isExcelTask('ab isme bonus column add kar do')).toBe(false);
     expect(isExcelTask('salary ke hisaab se sort kardo')).toBe(false);
+  });
+
+  it('recognizes continuation task when Excel process is running even without prior session', () => {
+    ExcelSessionManager.mockExcelRunning = true;
+    expect(isExcelTask('now make a pie chart of marks in each subject')).toBe(true);
+    expect(isExcelTask('ab isme bonus column add kar do')).toBe(true);
+    expect(isExcelTask('salary ke hisaab se sort kardo')).toBe(true);
+    ExcelSessionManager.mockExcelRunning = false;
   });
 
   it('correctly accepts standalone initial Excel task', () => {

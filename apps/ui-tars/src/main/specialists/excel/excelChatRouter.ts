@@ -43,8 +43,11 @@ export function isExcelTask(instructions: string): boolean {
     return true;
   }
 
-  // Case 2: Multi-turn continuation task when an Excel workbook session exists
-  if (ExcelSessionManager.hasActiveSession()) {
+  // Case 2: Multi-turn continuation task when an Excel session exists OR Excel process is currently active/running
+  const hasSession = ExcelSessionManager.hasActiveSession();
+  const excelIsRunning = ExcelSessionManager.isExcelRunning();
+
+  if (hasSession || excelIsRunning) {
     // Exclude unrelated operations
     const isExplicitlyDifferent =
       (lower.includes('open chrome') ||
@@ -69,6 +72,11 @@ export function isExcelTask(instructions: string): boolean {
       'total',
       'average',
       'avg',
+      'mean',
+      'highest',
+      'lowest',
+      'max',
+      'min',
       'formula',
       'tax',
       'commission',
@@ -90,6 +98,14 @@ export function isExcelTask(instructions: string): boolean {
       'plot',
       'pie',
       'bar',
+      'line',
+      'distribution',
+      'marks',
+      'subject',
+      'grade',
+      'score',
+      'attendance',
+      'student',
       'update',
       'change',
       'replace',

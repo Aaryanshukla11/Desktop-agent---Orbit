@@ -26,7 +26,12 @@ export class ExcelContinuationEngine {
 
     const lower = instructions.toLowerCase();
 
-    // 1. ADD COLUMN / FORMULA (e.g. bonus, tax, annual salary, email, percentage)
+    // 1. CHART / VISUALIZATION (e.g. pie chart, bar chart, graph) - Check first so "add pie chart" routes to chart
+    if (lower.includes('chart') || lower.includes('graph') || lower.includes('pie') || lower.includes('bar') || lower.includes('plot')) {
+      return this.executeAddChart(instructions, session, onProgress);
+    }
+
+    // 2. ADD COLUMN / FORMULA (e.g. bonus, tax, annual salary, email, percentage)
     if (
       lower.includes('bonus') ||
       lower.includes('tax') ||
@@ -45,24 +50,19 @@ export class ExcelContinuationEngine {
       return this.executeAddColumn(instructions, session, onProgress);
     }
 
-    // 2. SORT DATA
+    // 3. SORT DATA
     if (lower.includes('sort') || lower.includes('order') || lower.includes('arrange') || lower.includes('ascending') || lower.includes('descending')) {
       return this.executeSortData(instructions, session, onProgress);
     }
 
-    // 3. CLEAN & DEDUPLICATE
+    // 4. CLEAN & DEDUPLICATE
     if (lower.includes('clean') || lower.includes('deduplicate') || lower.includes('duplicate') || lower.includes('trim') || lower.includes('casing') || lower.includes('hatao')) {
       return this.executeCleanData(instructions, session, onProgress);
     }
 
-    // 4. SUMMARY / METRICS (average, total, sum, max, min, highest, lowest)
+    // 5. SUMMARY / METRICS (average, total, sum, max, min, highest, lowest)
     if (lower.includes('average') || lower.includes('avg') || lower.includes('total') || lower.includes('sum') || lower.includes('highest') || lower.includes('lowest') || lower.includes('max') || lower.includes('min')) {
       return this.executeSummaryMetric(instructions, session, onProgress);
-    }
-
-    // 5. CHART / VISUALIZATION
-    if (lower.includes('chart') || lower.includes('graph') || lower.includes('pie') || lower.includes('bar') || lower.includes('plot')) {
-      return this.executeAddChart(instructions, session, onProgress);
     }
 
     // Fallback: Default to Add Column / Smart Calculation
@@ -545,14 +545,33 @@ Summary analytics for **${session.rowCount} records** in **\`${session.fileName}
   }
 
   /**
-   * Action 5: Add or update chart
+   * Action 5: Add or update chart dynamically
    */
   private async executeAddChart(
-    _instructions: string,
+    instructions: string,
     session: ActiveExcelSession,
     onProgress?: (status: string, percentage: number) => void,
   ): Promise<ContinuationExecutionResult> {
     onProgress?.('Generating chart on active worksheet...', 50);
+
+    const lower = instructions.toLowerCase();
+    let chartTypeConstant = 51; // xlColumnClustered
+    let chartTypeName = 'Clustered Column Chart';
+    let chartTitle = 'Data Distribution Analytics';
+
+    if (lower.includes('pie')) {
+      chartTypeConstant = 5; // xlPie
+      chartTypeName = 'Pie Chart';
+      chartTitle = lower.includes('subject') || lower.includes('mark') ? 'Subject Marks Distribution' : 'Proportional Distribution';
+    } else if (lower.includes('bar')) {
+      chartTypeConstant = 57; // xlBarClustered
+      chartTypeName = 'Bar Chart';
+      chartTitle = 'Comparative Analysis';
+    } else if (lower.includes('line')) {
+      chartTypeConstant = 4; // xlLine
+      chartTypeName = 'Trend Line Chart';
+      chartTitle = 'Trend Analytics';
+    }
 
     const scratchDir = path.resolve(process.cwd(), 'scratch');
     if (!fs.existsSync(scratchDir)) fs.mkdirSync(scratchDir, { recursive: true });
@@ -562,16 +581,90 @@ Summary analytics for **${session.rowCount} records** in **\`${session.fileName}
 $ErrorActionPreference = 'Stop'
 try {
     $targetPath = '${session.filePath.replace(/'/g, "''")}'
-    $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
-    $wb = $excel.Workbooks.Open($targetPath)
-    $sheet = $wb.Sheets.Item(1)
+    $excel = $null
+    try {
+        $excel = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+    } catch {
+        $excel = New-Object -ComObject Excel.Application
+    }
+    $excel.Visible = $true
+    $excel.DisplayAlerts = $false
 
-    # Add Clustered Column Chart
-    $chartShape = $sheet.Shapes.AddChart2(201, 550, 20, 500, 320)
+    # Locate workbook: match open workbooks or open from targetPath
+    $wb = $null
+    foreach ($w in $excel.Workbooks) {
+        if ($w.FullName -eq $targetPath -or $w.Name -eq '${session.fileName.replace(/'/g, "''")}') {
+            $wb = $w
+            break
+        }
+    }
+    if ($wb -eq $null) {
+        if ($excel.ActiveWorkbook) {
+            $wb = $excel.ActiveWorkbook
+        } elseif ([System.IO.File]::Exists($targetPath)) {
+            $wb = $excel.Workbooks.Open($targetPath)
+        } else {
+            throw "Workbook not found at $targetPath"
+        }
+    }
+
+    $sheet = $wb.ActiveSheet
+    if ($sheet -eq $null) {
+        $sheet = $wb.Sheets.Item(1)
+    }
+
+    # Inspect used range
+    $usedRange = $sheet.UsedRange
+    $numRows = [Math]::Min($usedRange.Rows.Count, 300)
+    $numCols = [Math]::Min($usedRange.Columns.Count, 25)
+
+    if ($numRows -lt 2) {
+        throw "Worksheet does not contain enough data rows to generate a chart."
+    }
+
+    # Scan header row for suitable category and numeric value columns
+    $catCol = 1
+    $valCol = 2
+
+    for ($c = 1; $c -le $numCols; $c++) {
+        $hdr = [string]($sheet.Cells.Item(1, $c).Text).ToLower()
+        if ($hdr -match 'subject|department|dept|name|item|category|role|title') {
+            $catCol = $c
+        }
+        if ($hdr -match 'mark|score|grade|salary|rate|attendance|count|total|value|amt') {
+            $valCol = $c
+        }
+    }
+
+    if ($catCol -eq $valCol) {
+        if ($catCol -gt 1) { $catCol = 1 } else { $valCol = 2 }
+    }
+
+    # Calculate positioning (to the right of existing data)
+    $chartLeft = $sheet.Cells.Item(2, [Math]::Max($numCols + 2, 7)).Left
+    if ($chartLeft -le 0) { $chartLeft = 520 }
+    $chartTop = 20
+    $chartWidth = 520
+    $chartHeight = 340
+
+    # Range for chart
+    $limitRows = [Math]::Min($numRows, 100)
+    $catRange = $sheet.Range($sheet.Cells.Item(1, $catCol), $sheet.Cells.Item($limitRows, $catCol))
+    $valRange = $sheet.Range($sheet.Cells.Item(1, $valCol), $sheet.Cells.Item($limitRows, $valCol))
+    $chartData = $excel.Union($catRange, $valRange)
+
+    # Create Chart Shape
+    $chartShape = $sheet.Shapes.AddChart2(201, ${chartTypeConstant}, $chartLeft, $chartTop, $chartWidth, $chartHeight)
     $chart = $chartShape.Chart
-    $chart.SetSourceData($sheet.Range("C1:C201"))
+    $chart.SetSourceData($chartData)
     $chart.HasTitle = $true
-    $chart.ChartTitle.Text = "Department Distribution"
+    $chart.ChartTitle.Text = "${chartTitle.replace(/"/g, '`"')}"
+
+    # Activate Excel window so user sees chart on screen immediately
+    try {
+        $wscript = New-Object -ComObject WScript.Shell
+        $wscript.AppActivate($excel.Caption)
+    } catch {}
 
     $wb.Save()
     Write-Output "ORBIT_RESULT:SUCCESS"
@@ -588,11 +681,13 @@ try {
       throw new Error(execResult.error || 'Failed to generate chart in workbook.');
     }
 
-    const summaryMarkdown = `**Excel Chart Created**
+    const summaryMarkdown = `**Excel Chart Created Successfully**
 
-Successfully embedded native **Clustered Column Chart** in **\`${session.fileName}\`**!
-- Positioned alongside dataset for presentation
-- Live link to employee records`;
+Successfully created native **${chartTypeName}** in **\`${session.fileName}\`**!
+- **Chart Title**: ${chartTitle}
+- **Type**: Native ${chartTypeName} (${chartTypeConstant === 5 ? 'xlPie' : chartTypeConstant === 57 ? 'xlBarClustered' : 'xlColumnClustered'})
+- **Visual Presentation**: Embedded directly alongside dataset on active worksheet
+- **Reactive Data**: Synchronized with worksheet cells`;
 
     return {
       success: true,

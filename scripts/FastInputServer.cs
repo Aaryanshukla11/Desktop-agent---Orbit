@@ -674,7 +674,10 @@ public class FastInputServer {
 
     public static void DoHardwareDrag(int x1, int y1, int x2, int y2) {
         EnsureDesktopAttached();
-        try { EnsureWindowFocused(x1, y1); } catch {}
+        try {
+            EnsureWindowFocused(x1, y1);
+            Thread.Sleep(50);
+        } catch {}
         int screenW = Math.Max(1, GetSystemMetrics(0));
         int screenH = Math.Max(1, GetSystemMetrics(1));
 
@@ -688,7 +691,7 @@ public class FastInputServer {
         moveInputs[0].mi.dy = normY1;
         moveInputs[0].mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
         SendInput(1, moveInputs, Marshal.SizeOf(typeof(INPUT)));
-        Thread.Sleep(30);
+        Thread.Sleep(50);
 
         INPUT[] downInputs = new INPUT[1];
         downInputs[0].type = INPUT_MOUSE;
@@ -696,30 +699,31 @@ public class FastInputServer {
         downInputs[0].mi.dy = normY1;
         downInputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_ABSOLUTE;
         SendInput(1, downInputs, Marshal.SizeOf(typeof(INPUT)));
-        Thread.Sleep(60);
+        // Win32 / Excel requires a minimum mouse down hold threshold (80-100ms) to initiate range drag-selection
+        Thread.Sleep(100);
 
         int dist = (int)Math.Sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
-        int steps = Math.Max(35, dist / 5);
+        int steps = Math.Max(30, dist / 6);
         for (int i = 1; i <= steps; i++) {
             int curX = x1 + (x2 - x1) * i / steps;
             int curY = y1 + (y2 - y1) * i / steps;
             int curNormX = (int)Math.Round((curX * 65535.0) / (screenW - 1));
             int curNormY = (int)Math.Round((curY * 65535.0) / (screenH - 1));
 
-            SetCursorPos(curX, curY);
             INPUT[] stepMove = new INPUT[1];
             stepMove[0].type = INPUT_MOUSE;
             stepMove[0].mi.dx = curNormX;
             stepMove[0].mi.dy = curNormY;
             stepMove[0].mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
             SendInput(1, stepMove, Marshal.SizeOf(typeof(INPUT)));
-            Thread.Sleep(6);
+            SetCursorPos(curX, curY);
+            Thread.Sleep(8);
         }
 
         int normX2 = (int)Math.Round((x2 * 65535.0) / (screenW - 1));
         int normY2 = (int)Math.Round((y2 * 65535.0) / (screenH - 1));
         SetCursorPos(x2, y2);
-        Thread.Sleep(50);
+        Thread.Sleep(80);
 
         INPUT[] upInputs = new INPUT[1];
         upInputs[0].type = INPUT_MOUSE;
@@ -727,7 +731,7 @@ public class FastInputServer {
         upInputs[0].mi.dy = normY2;
         upInputs[0].mi.dwFlags = MOUSEEVENTF_LEFTUP | MOUSEEVENTF_ABSOLUTE;
         SendInput(1, upInputs, Marshal.SizeOf(typeof(INPUT)));
-        Thread.Sleep(30);
+        Thread.Sleep(40);
     }
 
     public static AutomationElement GetActiveWindowAutomationElement(out IntPtr activeHwnd, out string title, out string processName, out RECT rect) {

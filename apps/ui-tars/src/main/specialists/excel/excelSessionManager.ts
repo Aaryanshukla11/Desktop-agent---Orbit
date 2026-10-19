@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { execSync } from 'child_process';
 import { logger } from '../../logger';
 
 export interface ActiveExcelSession {
@@ -18,6 +19,7 @@ export interface ActiveExcelSession {
 
 export class ExcelSessionManager {
   public static autoDiscoveryEnabled: boolean = true;
+  public static mockExcelRunning: boolean | null = null;
   private static session: ActiveExcelSession | null = null;
   private static sessionFile = path.resolve(process.cwd(), 'runs', 'active_excel_session.json');
 
@@ -33,6 +35,53 @@ export class ExcelSessionManager {
     } catch (err) {
       logger.warn('[ExcelSessionManager] Failed to persist active session to disk:', err);
     }
+  }
+
+  /**
+   * Fast check if Microsoft Excel process is running on the system
+   */
+  public static isExcelRunning(): boolean {
+    if (this.mockExcelRunning !== null) return this.mockExcelRunning;
+    if (process.platform !== 'win32') return false;
+    try {
+      const stdout = execSync('tasklist /FI "IMAGENAME eq excel.exe" /NH', {
+        encoding: 'utf8',
+        windowsHide: true,
+        timeout: 1500,
+      });
+      return stdout.toLowerCase().includes('excel.exe');
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Directly queries the running Excel instance for its currently open active workbook
+   */
+  public static getActiveWorkbookFromRunningExcel(): { filePath: string; sheetName: string } | null {
+    if (!this.isExcelRunning()) return null;
+    try {
+      const cmd = `powershell -NoProfile -Command "try { $e = [System.Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application'); if ($e.ActiveWorkbook) { Write-Output ('ORBIT_ACTIVE_WB:' + $e.ActiveWorkbook.FullName + '::' + $e.ActiveSheet.Name) } } catch {}"`;
+      const out = execSync(cmd, {
+        encoding: 'utf8',
+        windowsHide: true,
+        timeout: 2500,
+      });
+      for (const line of out.split('\n')) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('ORBIT_ACTIVE_WB:')) {
+          const rest = trimmed.replace('ORBIT_ACTIVE_WB:', '');
+          const [fullPath, sheetName] = rest.split('::');
+          if (fullPath && fs.existsSync(fullPath)) {
+            logger.info(`[ExcelSessionManager] Connected directly to running Excel workbook: ${fullPath} (Sheet: ${sheetName})`);
+            return { filePath: fullPath, sheetName: sheetName || 'Sheet1' };
+          }
+        }
+      }
+    } catch (err) {
+      logger.debug('[ExcelSessionManager] Active COM workbook query returned no result:', err);
+    }
+    return null;
   }
 
   public static getActiveSession(): ActiveExcelSession | null {
@@ -55,7 +104,7 @@ export class ExcelSessionManager {
       }
     }
 
-    // 3. Fallback discovery: Look for the most recent Excel file on Desktop created in the last 2 hours
+    // 3. Fallback discovery: Look for the most recent Excel file on Desktop created or running in Excel
     if (this.autoDiscoveryEnabled) {
       const recentDesktopFile = this.discoverRecentDesktopWorkbook();
       if (recentDesktopFile) {
@@ -98,16 +147,31 @@ export class ExcelSessionManager {
   }
 
   /**
-   * Auto-discovers recently modified .xlsx files on Desktop (OneDrive Desktop or User Desktop)
+   * Auto-discovers active workbook via running Excel COM or recently modified .xlsx files on Desktop
    */
   private static discoverRecentDesktopWorkbook(): ActiveExcelSession | null {
+    // Priority 1: If Excel is currently open, query active workbook directly
+    const runningWb = this.getActiveWorkbookFromRunningExcel();
+    if (runningWb) {
+      return {
+        filePath: runningWb.filePath,
+        fileName: path.basename(runningWb.filePath),
+        mainSheetName: runningWb.sheetName,
+        headers: [],
+        rowCount: 100,
+        lastUpdated: Date.now(),
+        domainName: 'Active Excel Workbook',
+      };
+    }
+
+    // Priority 2: Scan Desktop & runs for recently modified .xlsx files (up to 24h old)
     const candidateDirs = [
       path.join(os.homedir(), 'OneDrive', 'Desktop'),
       path.join(os.homedir(), 'Desktop'),
       path.resolve(process.cwd(), 'runs'),
     ];
 
-    const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
     let newestFile: { fullPath: string; mtimeMs: number } | null = null;
 
     for (const dir of candidateDirs) {
@@ -118,7 +182,7 @@ export class ExcelSessionManager {
           if (!f.endsWith('.xlsx')) continue;
           const fullPath = path.join(dir, f);
           const stat = fs.statSync(fullPath);
-          if (stat.mtimeMs > twoHoursAgo) {
+          if (stat.mtimeMs > oneDayAgo) {
             if (!newestFile || stat.mtimeMs > newestFile.mtimeMs) {
               newestFile = { fullPath, mtimeMs: stat.mtimeMs };
             }
@@ -133,9 +197,9 @@ export class ExcelSessionManager {
       return {
         filePath: newestFile.fullPath,
         fileName,
-        mainSheetName: 'EmployeeData',
-        headers: ['Employee ID', 'Full Name', 'Department', 'Job Title', 'Hourly Rate ($)', 'Monthly Salary ($)', 'Status'],
-        rowCount: 200,
+        mainSheetName: 'Sheet1',
+        headers: [],
+        rowCount: 100,
         lastUpdated: newestFile.mtimeMs,
         domainName: 'Discovered Dataset',
       };

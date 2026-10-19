@@ -255,6 +255,8 @@ export const runAgent = async (
   let lastActionName = 'initial';
   let lastRunScreenshotBase64: string | null = null;
   let isCurrentStepStagnant = false;
+  let consecutiveStagnantSteps = 0;
+  let lastActionSignature = '';
 
   const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
     data,
@@ -302,6 +304,17 @@ export const runAgent = async (
               normCoords = typeof rawBox === 'string' ? JSON.parse(rawBox) : rawBox;
             } catch {}
           }
+
+          const curActionSignature = `${pred.action_type}:${JSON.stringify(pred.action_inputs || {})}`;
+          const isIdenticalAction = curActionSignature === lastActionSignature;
+          lastActionSignature = curActionSignature;
+
+          if (isCurrentStepStagnant || isIdenticalAction) {
+            consecutiveStagnantSteps++;
+          } else {
+            consecutiveStagnantSteps = 0;
+          }
+
           const verifiedStatus =
             status === StatusEnum.END
               ? 'TASK_COMPLETED'
@@ -324,6 +337,47 @@ export const runAgent = async (
             );
           } catch (err) {
             logger.error('[T0 Evidence] error writing runtime.json:', err);
+          }
+
+          // Loop Breaker: If 2 consecutive identical drag actions or 3 stagnant steps occur, break loop immediately!
+          const isStuckDrag = isIdenticalAction && pred.action_type === 'drag' && consecutiveStagnantSteps >= 2;
+          const isStuckGeneral = consecutiveStagnantSteps >= 3 && status !== StatusEnum.END;
+
+          if (isStuckDrag || isStuckGeneral) {
+            logger.warn(
+              `[runAgent] 🛑 Repetitive action/stagnation loop detected (${consecutiveStagnantSteps} steps for action ${pred.action_type}). Breaking loop to prevent infinite token consumption.`,
+            );
+
+            // Release any stuck hardware drag / mouse capture
+            if (process.platform === 'win32') {
+              try {
+                await fastInput.hotkey('esc');
+              } catch {}
+            }
+
+            try {
+              abortController?.abort();
+            } catch {}
+
+            const breakerMsg = {
+              from: 'assistant',
+              value: `Action execution halted: Orbit detected repetitive ${pred.action_type} attempts with no visual progress on screen. Automatically stopped to conserve tokens.`,
+              predictionParsed: [
+                {
+                  action_type: 'finished',
+                  action_inputs: {
+                    content: 'Execution stopped automatically to break repetitive loop.',
+                  },
+                },
+              ],
+            };
+
+            setState({
+              ...getState(),
+              status: StatusEnum.END,
+              messages: [...(getState().messages || []), breakerMsg as any],
+            });
+            return;
           }
         }
       }
