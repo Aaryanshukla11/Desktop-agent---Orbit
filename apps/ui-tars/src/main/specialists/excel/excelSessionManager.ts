@@ -183,7 +183,7 @@ export class ExcelSessionManager {
       path.resolve(process.cwd(), 'runs'),
     ];
 
-    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     let newestFile: { fullPath: string; mtimeMs: number } | null = null;
 
     for (const dir of candidateDirs) {
@@ -192,9 +192,10 @@ export class ExcelSessionManager {
         const files = fs.readdirSync(dir);
         for (const f of files) {
           if (!f.endsWith('.xlsx')) continue;
+          if (f.startsWith('~') || f.startsWith('.')) continue; // ignore lock and temporary hidden files
           const fullPath = path.join(dir, f);
           const stat = fs.statSync(fullPath);
-          if (stat.mtimeMs > oneDayAgo) {
+          if (stat.mtimeMs > thirtyDaysAgo) {
             if (!newestFile || stat.mtimeMs > newestFile.mtimeMs) {
               newestFile = { fullPath, mtimeMs: stat.mtimeMs };
             }
